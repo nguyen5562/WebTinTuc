@@ -1,0 +1,544 @@
+@model WebTinTuc.Models.BaiViet
+@{
+    ViewData["Title"] = "Chỉnh sửa bài viết";
+    var chuDes = ViewBag.ChuDes as List<WebTinTuc.Models.ChuDe>;
+    var trangThai = ViewBag.TrangThai as List<WebTinTuc.Models.TrangThaiBaiViet>;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-primary mb-1">
+                        <i class="fas fa-edit me-2"></i>Chỉnh sửa bài viết
+                    </h2>
+                    <p class="text-muted mb-0">Chỉnh sửa bài viết: <strong>@Model.TieuDe</strong></p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Details", "BaiViet", new { id = Model.IdbaiViet })" class="btn btn-outline-info me-2">
+                        <i class="fas fa-eye me-1"></i>Xem bài viết
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary me-2" id="previewBtn">
+                        <i class="fas fa-eye me-1"></i>Xem trước
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveDraftBtn">
+                        <i class="fas fa-save me-1"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form chỉnh sửa bài viết -->
+            <form id="editArticleForm" class="needs-validation" novalidate>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.IdbaiViet" />
+                
+                <div class="row">
+                    <!-- Cột chính -->
+                    <div class="col-lg-8">
+                        <!-- Thông tin cơ bản -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>Thông tin cơ bản
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="tieuDe" class="form-label">
+                                        Tiêu đề bài viết <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg" id="tieuDe" name="tieuDe" 
+                                           value="@Model.TieuDe" required>
+                                    <div class="invalid-feedback">Vui lòng nhập tiêu đề bài viết!</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="tomTat" class="form-label">Tóm tắt bài viết</label>
+                                    <textarea class="form-control" id="tomTat" name="tomTat" rows="3">@Model.TomTat</textarea>
+                                    <div class="form-text">Tóm tắt sẽ hiển thị ở trang chủ và danh sách bài viết</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="urlanhBia" class="form-label">URL ảnh bìa</label>
+                                    <input type="url" class="form-control" id="urlanhBia" name="urlanhBia" 
+                                           value="@Model.UrlanhBia">
+                                    <div class="form-text">URL ảnh bìa cho bài viết (tùy chọn)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nội dung bài viết -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-file-alt me-2"></i>Nội dung bài viết
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="noiDung" class="form-label">
+                                        Nội dung <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea id="noiDung" name="noiDung" required>@Html.Raw(Model.NoiDung)</textarea>
+                                    <div class="invalid-feedback">Vui lòng nhập nội dung bài viết!</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="col-lg-4">
+                        <!-- Cài đặt xuất bản -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-cog me-2"></i>Cài đặt xuất bản
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="idchuDe" class="form-label">
+                                        Chủ đề <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="idchuDe" name="idchuDe" required>
+                                        <option value="">-- Chọn chủ đề --</option>
+                                        @if (chuDes != null)
+                                        {
+                                            @foreach (var chuDe in chuDes)
+                                            {
+                                                <option value="@chuDe.IdchuDe" selected="@(chuDe.IdchuDe == Model.IdchuDe)">
+                                                    @chuDe.TenChuDe
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                    <div class="invalid-feedback">Vui lòng chọn chủ đề!</div>
+                                </div>
+
+                                <!-- Hiển thị trạng thái hiện tại -->
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-1"></i>Trạng thái hiện tại
+                                    </h6>
+                                    <hr>
+                                    <span class="badge bg-@(Model.IdtrangThaiNavigation.TenTrangThai == "Đã xuất bản" ? "success" : Model.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt" ? "warning" : "secondary")">
+                                        @Model.IdtrangThaiNavigation.TenTrangThai
+                                    </span>
+                                    <br><br>
+                                    <small>
+                                        • <strong>Lưu bản nháp:</strong> Bài viết sẽ được lưu dưới dạng bản nháp<br>
+                                        • <strong>Gửi chờ duyệt:</strong> Bài viết sẽ được gửi cho quản trị viên phê duyệt
+                                    </small>
+                                </div>
+
+                                <!-- Đánh dấu tin nóng sẽ được quản lý bởi trang quản trị -->
+
+                                <!-- Thông tin bài viết -->
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-1"></i>Thông tin bài viết
+                                    </h6>
+                                    <hr>
+                                    <small>
+                                        <strong>Tác giả:</strong> @Model.IdtacGiaNavigation.HoTen<br>
+                                        <strong>Ngày tạo:</strong> @Model.NgayTao?.ToString("dd/MM/yyyy HH:mm")<br>
+                                        <strong>Lần sửa cuối:</strong> @Model.NgayChinhSuaCuoi?.ToString("dd/MM/yyyy HH:mm")<br>
+                                        <strong>Lượt xem:</strong> @Model.LuotXem
+                                    </small>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-success btn-lg" id="publishBtn">
+                                        <i class="fas fa-paper-plane me-1"></i>Gửi chờ duyệt
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">
+                                        <i class="fas fa-save me-1"></i>Lưu bản nháp
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gợi ý chỉnh sửa -->
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-lightbulb me-2"></i>Gợi ý chỉnh sửa
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        <small>Kiểm tra chính tả và ngữ pháp</small>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        <small>Cập nhật thông tin mới nhất</small>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        <small>Tối ưu hóa hình ảnh</small>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        <small>Kiểm tra liên kết</small>
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        <small>Xem trước trước khi xuất bản</small>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xem trước -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-eye me-2"></i>Xem trước bài viết
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent">
+                    <!-- Nội dung xem trước sẽ được load ở đây -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- TinyMCE Self-hosted -->
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.7.2/tinymce.min.js"></script>
+    
+    <script>
+        let editor;
+        
+        // Khởi tạo TinyMCE
+        tinymce.init({
+            selector: '#noiDung',
+            height: 400,
+            language: 'vi',
+            branding: false,
+            statusbar: false,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount', 'emoticons',
+                'paste', 'textcolor', 'colorpicker', 'textpattern', 'nonbreaking',
+                'pagebreak', 'save', 'directionality', 'template', 'hr'
+            ],
+            toolbar: 'undo redo | blocks | ' +
+                'bold italic underline strikethrough | alignleft aligncenter ' +
+                'alignright alignjustify | bullist numlist outdent indent | ' +
+                'forecolor backcolor | removeformat | help | ' +
+                'link image media table | charmap emoticons | ' +
+                'insertdatetime | fullscreen preview code | save',
+            toolbar_mode: 'sliding',
+            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }',
+            menubar: 'file edit view insert format tools table help',
+            menu: {
+                file: { title: 'File', items: 'newdocument restoredraft | preview | print ' },
+                edit: { title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall | searchreplace' },
+                view: { title: 'View', items: 'code | visualaid visualchars visualblocks | spellchecker | preview fullscreen' },
+                insert: { title: 'Insert', items: 'image link media template codesample inserttable | charmap emoticons hr | pagebreak nonbreaking anchor | insertdatetime' },
+                format: { title: 'Format', items: 'bold italic underline strikethrough superscript subscript codeformat | blocks fontfamily fontsize align lineheight | forecolor backcolor | removeformat' },
+                tools: { title: 'Tools', items: 'spellchecker spellcheckerlanguage | code wordcount' },
+                table: { title: 'Table', items: 'inserttable | cell row column | tableprops deletetable' },
+                help: { title: 'Help', items: 'help' }
+            },
+            images_upload_handler: function (blobInfo, success, failure) {
+                var xhr, formData;
+                xhr = new XMLHttpRequest();
+                xhr.withCredentials = false;
+                xhr.open('POST', '@Url.Action("UploadImage", "BaiViet")');
+                
+                xhr.onload = function() {
+                    var json;
+                    if (xhr.status != 200) {
+                        failure('HTTP Error: ' + xhr.status);
+                        return;
+                    }
+                    json = JSON.parse(xhr.responseText);
+                    if (!json || typeof json.url != 'string') {
+                        failure('Invalid JSON: ' + xhr.responseText);
+                        return;
+                    }
+                    success(json.url);
+                };
+                
+                formData = new FormData();
+                formData.append('upload', blobInfo.blob(), blobInfo.filename());
+                formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+                
+                xhr.send(formData);
+            },
+            setup: function (editor) {
+                editor.on('init', function () {
+                    // Không cần set content vì đã có sẵn từ model
+                });
+            }
+        });
+
+        // Function hiển thị thông báo
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Function submit form với actionType
+        function submitForm(actionType) {
+            if (!validateForm()) {
+                return;
+            }
+            
+            const formData = new FormData(document.getElementById('editArticleForm'));
+            formData.append('actionType', actionType);
+            formData.append('noiDung', tinymce.get('noiDung').getContent());
+            
+            const submitBtn = document.getElementById(actionType === 'publish' ? 'publishBtn' : 'saveDraftBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Disable button và hiển thị loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xử lý...';
+            
+            fetch('@Url.Action("Edit", "BaiViet", new { id = Model.IdbaiViet })', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    // Chuyển đến trang chi tiết bài viết
+                    setTimeout(() => {
+                        window.location.href = '@Url.Action("Details", "BaiViet", new { id = Model.IdbaiViet })';
+                    }, 1500);
+                } else {
+                    showNotification(data.message, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                showNotification('Có lỗi xảy ra khi cập nhật bài viết!', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            });
+        }
+
+        // Xử lý nút gửi chờ duyệt
+        document.getElementById('publishBtn').addEventListener('click', function() {
+            submitForm('publish');
+        });
+
+        // Xử lý nút lưu bản nháp
+        document.getElementById('saveDraftBtn').addEventListener('click', function() {
+            submitForm('draft');
+        });
+
+        // Xử lý nút xem trước
+        document.getElementById('previewBtn').addEventListener('click', function() {
+            if (!validateForm()) {
+                return;
+            }
+            
+            const tieuDe = document.getElementById('tieuDe').value;
+            const tomTat = document.getElementById('tomTat').value;
+            const noiDung = tinymce.get('noiDung').getContent();
+            const urlanhBia = document.getElementById('urlanhBia').value;
+            
+            let previewHtml = `
+                <article class="preview-article">
+                    <h1 class="preview-title">${tieuDe}</h1>
+            `;
+            
+            if (urlanhBia) {
+                previewHtml += `<img src="${urlanhBia}" alt="${tieuDe}" class="img-fluid mb-3 rounded">`;
+            }
+            
+            if (tomTat) {
+                previewHtml += `<div class="alert alert-light border-start border-primary border-4 mb-4">
+                    <h5 class="alert-heading mb-2"><i class="fas fa-quote-left text-primary me-2"></i>Tóm tắt</h5>
+                    <p class="mb-0 fst-italic">${tomTat}</p>
+                </div>`;
+            }
+            
+            previewHtml += `
+                    <div class="preview-content">
+                        ${noiDung}
+                    </div>
+                </article>
+            `;
+            
+            document.getElementById('previewContent').innerHTML = previewHtml;
+            
+            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
+        });
+
+        // Validation form
+        function validateForm() {
+            const form = document.getElementById('editArticleForm');
+            const tieuDe = document.getElementById('tieuDe').value.trim();
+            const idchuDe = document.getElementById('idchuDe').value;
+            const noiDung = tinymce.get('noiDung').getContent().trim();
+            
+            let isValid = true;
+            
+            // Validate tiêu đề
+            if (!tieuDe || tieuDe.length < 5) {
+                document.getElementById('tieuDe').classList.add('is-invalid');
+                isValid = false;
+            } else {
+                document.getElementById('tieuDe').classList.remove('is-invalid');
+            }
+            
+            // Validate chủ đề
+            if (!idchuDe) {
+                document.getElementById('idchuDe').classList.add('is-invalid');
+                isValid = false;
+            } else {
+                document.getElementById('idchuDe').classList.remove('is-invalid');
+            }
+            
+            // Validate nội dung
+            if (!noiDung || noiDung.length < 50) {
+                showNotification('Nội dung phải có ít nhất 50 ký tự!', 'error');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // Auto-save draft (mỗi 30 giây)
+        setInterval(function() {
+            const tieuDe = document.getElementById('tieuDe').value.trim();
+            const noiDung = tinymce.get('noiDung').getContent().trim();
+            
+            if (tieuDe && noiDung) {
+                // Lưu vào localStorage
+                const draft = {
+                    id: @Model.IdbaiViet,
+                    tieuDe: tieuDe,
+                    tomTat: document.getElementById('tomTat').value,
+                    noiDung: noiDung,
+                    urlanhBia: document.getElementById('urlanhBia').value,
+                    idchuDe: document.getElementById('idchuDe').value,
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem('articleDraft_' + @Model.IdbaiViet, JSON.stringify(draft));
+            }
+        }, 30000);
+
+        // Cảnh báo khi rời trang mà chưa lưu
+        window.addEventListener('beforeunload', function(e) {
+            const tieuDe = document.getElementById('tieuDe').value.trim();
+            const noiDung = tinymce.get('noiDung').getContent().trim();
+            
+            if (tieuDe && noiDung) {
+                e.preventDefault();
+                e.returnValue = 'Bạn có thay đổi chưa được lưu. Bạn có chắc chắn muốn rời khỏi trang?';
+            }
+        });
+    </script>
+    
+    <style>
+        .tox-tinymce {
+            border-radius: 8px;
+        }
+        
+        .tox .tox-toolbar__primary {
+            background: #f8f9fa;
+        }
+        
+        .preview-article {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .preview-title {
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+        
+        .preview-content {
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .preview-content h1, .preview-content h2, .preview-content h3,
+        .preview-content h4, .preview-content h5, .preview-content h6 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .preview-content p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .preview-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 1rem 0;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545;
+        }
+        
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+    </style>
+}

@@ -161,24 +161,28 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="editProfileForm">
+                    @Html.AntiForgeryToken()
                     <div class="mb-3">
-                        <label for="editHoTen" class="form-label">Họ và tên</label>
-                        <input type="text" class="form-control" id="editHoTen" value="@Model.HoTen">
+                        <label for="editHoTen" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editHoTen" name="hoTen" value="@Model.HoTen" required>
+                        <div class="invalid-feedback">Vui lòng nhập họ tên!</div>
                     </div>
                     <div class="mb-3">
                         <label for="editSoDienThoai" class="form-label">Số điện thoại</label>
-                        <input type="tel" class="form-control" id="editSoDienThoai" value="@Model.SoDienThoai">
+                        <input type="tel" class="form-control" id="editSoDienThoai" name="soDienThoai" value="@Model.SoDienThoai" placeholder="0123456789">
+                        <div class="form-text">Số điện thoại là tùy chọn</div>
                     </div>
                     <div class="mb-3">
                         <label for="editAnhDaiDien" class="form-label">URL ảnh đại diện</label>
-                        <input type="url" class="form-control" id="editAnhDaiDien" value="@Model.UrlanhDaiDien" placeholder="https://example.com/avatar.jpg">
+                        <input type="url" class="form-control" id="editAnhDaiDien" name="urlAnhDaiDien" value="@Model.UrlanhDaiDien" placeholder="https://example.com/avatar.jpg">
+                        <div class="form-text">URL ảnh đại diện là tùy chọn</div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary">
+                <button type="button" class="btn btn-primary" id="saveProfileBtn">
                     <i class="fas fa-save me-1"></i>Lưu thay đổi
                 </button>
             </div>
@@ -188,7 +192,161 @@
 
 @section Scripts {
     <script>
-        // Modal functionality sẽ được implement sau
-        console.log('Profile page loaded');
+        // Function hiển thị thông báo
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Tự động ẩn sau 5 giây
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Xử lý nút lưu thông tin
+        document.getElementById('saveProfileBtn').addEventListener('click', function() {
+            const form = document.getElementById('editProfileForm');
+            const formData = new FormData(form);
+            const saveBtn = this;
+            const originalText = saveBtn.innerHTML;
+            
+            // Validation
+            const hoTen = document.getElementById('editHoTen').value.trim();
+            if (!hoTen || hoTen.length < 2) {
+                showNotification('Họ tên phải có ít nhất 2 ký tự!', 'error');
+                return;
+            }
+            
+            // Disable button và hiển thị loading
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang lưu...';
+            
+            fetch('@Url.Action("UpdateProfile", "Account")', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    // Đóng modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+                    modal.hide();
+                    // Reload trang để cập nhật thông tin
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showNotification(data.message, 'error');
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                showNotification('Có lỗi xảy ra khi cập nhật thông tin!', 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            });
+        });
+
+        // Xử lý khi modal được đóng
+        document.getElementById('editProfileModal').addEventListener('hidden.bs.modal', function() {
+            // Reset form về trạng thái ban đầu
+            document.getElementById('editProfileForm').reset();
+            const saveBtn = document.getElementById('saveProfileBtn');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>Lưu thay đổi';
+        });
+
+        // Validation real-time cho form
+        document.getElementById('editHoTen').addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value.length < 2) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Validation cho URL ảnh đại diện
+        document.getElementById('editAnhDaiDien').addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value && !isValidUrl(value)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
     </script>
+    
+    <style>
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .profile-info-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .profile-info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .profile-info-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.25rem;
+        }
+        
+        .profile-info-value {
+            color: #6c757d;
+        }
+        
+        .modal-body .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545;
+        }
+        
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+    </style>
 }

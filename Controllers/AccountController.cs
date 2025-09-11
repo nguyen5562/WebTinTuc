@@ -63,7 +63,7 @@ namespace WebTinTuc.Controllers
                 user.LanDangNhapCuoi = DateTime.Now;
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"Chào mừng {user.HoTen} quay trở lại!";
+                // TempData["SuccessMessage"] = $"Chào mừng {user.HoTen} quay trở lại!";
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -145,7 +145,7 @@ namespace WebTinTuc.Controllers
                 _context.NguoiDungs.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.";
+                // TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
@@ -160,7 +160,7 @@ namespace WebTinTuc.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công!";
+            // TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công!";
             return RedirectToAction("Index", "Home");
         }
 
@@ -186,6 +186,63 @@ namespace WebTinTuc.Controllers
             }
 
             return View(user);
+        }
+
+        // POST: Account/UpdateProfile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(string hoTen, string soDienThoai, string urlAnhDaiDien)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserId");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập!" });
+                }
+
+                if (string.IsNullOrEmpty(hoTen) || hoTen.Trim().Length < 2)
+                {
+                    return Json(new { success = false, message = "Họ tên phải có ít nhất 2 ký tự!" });
+                }
+
+                // Kiểm tra số điện thoại đã tồn tại chưa (nếu có)
+                if (!string.IsNullOrEmpty(soDienThoai))
+                {
+                    var existingPhone = await _context.NguoiDungs
+                        .FirstOrDefaultAsync(u => u.SoDienThoai == soDienThoai && u.IdnguoiDung.ToString() != userId);
+                    if (existingPhone != null)
+                    {
+                        return Json(new { success = false, message = "Số điện thoại này đã được sử dụng!" });
+                    }
+                }
+
+                // Tìm user
+                var user = await _context.NguoiDungs
+                    .FirstOrDefaultAsync(u => u.IdnguoiDung.ToString() == userId);
+
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy thông tin người dùng!" });
+                }
+
+                // Cập nhật thông tin
+                user.HoTen = hoTen.Trim();
+                user.SoDienThoai = string.IsNullOrEmpty(soDienThoai) ? null : soDienThoai.Trim();
+                user.UrlanhDaiDien = string.IsNullOrEmpty(urlAnhDaiDien) ? null : urlAnhDaiDien.Trim();
+
+                await _context.SaveChangesAsync();
+
+                // Cập nhật session
+                HttpContext.Session.SetString("UserName", user.HoTen);
+
+                return Json(new { success = true, message = "Cập nhật thông tin thành công!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi cập nhật thông tin người dùng");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật thông tin!" });
+            }
         }
 
         // Helper method để hash password

@@ -85,7 +85,7 @@
                                     @if (Context.Session.GetString("UserRole") == "Tác giả" || Context.Session.GetString("UserRole") == "Quản trị")
                                     {
                                         <li>
-                                            <a class="dropdown-item" href="#">
+                                            <a class="dropdown-item" asp-controller="BaiViet" asp-action="Create">
                                                 <i class="fas fa-edit me-1"></i>Viết bài
                                             </a>
                                         </li>
