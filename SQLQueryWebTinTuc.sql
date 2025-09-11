@@ -93,48 +93,6 @@ CREATE TABLE BinhLuan (
 );
 GO
 
--- ===================================================================
--- TẠO CÁC TRIGGER ĐỂ TỰ ĐỘNG CẬP NHẬT THỜI GIAN
--- ===================================================================
-
--- Trigger cho bảng BaiViet
--- Tự động cập nhật NgayChinhSuaCuoi khi có bất kỳ thay đổi nào.
--- Tự động cập nhật NgayXuatBan khi bài viết được chuyển sang trạng thái "Đã xuất bản" lần đầu tiên.
-CREATE TRIGGER TRG_BaiViet_CapNhatThoiGian
-ON BaiViet
-AFTER UPDATE
-AS
-BEGIN
-    -- Tắt thông báo "(1 row(s) affected)" để tránh nhiễu trong ứng dụng
-    SET NOCOUNT ON;
-
-    -- Đảm bảo trigger không chạy khi không có dòng nào thực sự được cập nhật
-    IF NOT EXISTS (SELECT 1 FROM inserted) RETURN;
-
-    -- Lấy ID của trạng thái "Đã xuất bản" để so sánh
-    DECLARE @IDTrangThaiXuatBan INT;
-    SELECT @IDTrangThaiXuatBan = IDTrangThai FROM TrangThaiBaiViet WHERE TenTrangThai = N'Đã xuất bản';
-
-    UPDATE BV
-    SET
-        -- 1. Luôn cập nhật ngày chỉnh sửa cuối cho tất cả các dòng bị thay đổi
-        NgayChinhSuaCuoi = GETDATE(),
-
-        -- 2. Chỉ cập nhật ngày xuất bản nếu bài viết được chuyển sang trạng thái "Đã xuất bản"
-        --    và trước đó nó chưa từng được xuất bản (tức là NgayXuatBan đang là NULL).
-        NgayXuatBan = CASE
-                         WHEN i.IDTrangThai = @IDTrangThaiXuatBan AND BV.NgayXuatBan IS NULL THEN GETDATE()
-                         ELSE BV.NgayXuatBan
-                      END
-    FROM
-        BaiViet AS BV
-    INNER JOIN
-        inserted AS i ON BV.IDBaiViet = i.IDBaiViet;
-
-END
-GO
-
-
 
 -- Script để thêm dữ liệu mẫu cho WebTinTuc
 -- Chạy script này sau khi đã tạo database
@@ -180,7 +138,7 @@ INSERT INTO BaiViet (TieuDe, Slug, TomTat, NoiDung, IDTacGia, IDChuDe, IDTrangTh
 
 -- 6. Thêm dữ liệu mẫu cho bảng BinhLuan
 INSERT INTO BinhLuan (IDBaiViet, IDNguoiDung, NoiDung, NgayBinhLuan, DaDuyet) VALUES
-(1, 3, 'Bài viết rất hay và bổ ích!', '2025-01-15 11:00:00', 1),
-(1, 1, 'Cảm ơn tác giả đã chia sẻ thông tin hữu ích.', '2025-01-15 12:00:00', 1),
-(2, 3, 'Tin tức kinh tế rất tích cực!', '2025-01-14 15:00:00', 1),
-(3, 3, 'Phim Việt Nam ngày càng hay!', '2025-01-13 17:00:00', 1);
+(1, 3, N'Bài viết rất hay và bổ ích!', '2025-01-15 11:00:00', 1),
+(1, 1, N'Cảm ơn tác giả đã chia sẻ thông tin hữu ích.', '2025-01-15 12:00:00', 1),
+(2, 3, N'Tin tức kinh tế rất tích cực!', '2025-01-14 15:00:00', 1),
+(3, 3, N'Phim Việt Nam ngày càng hay!', '2025-01-13 17:00:00', 1);

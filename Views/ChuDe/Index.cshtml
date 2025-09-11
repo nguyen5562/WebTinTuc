@@ -97,7 +97,7 @@
                                 
                                 <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">
-                                        <a asp-controller="ChuDe" asp-action="Details" asp-route-id="@baiViet.IdbaiViet" 
+                                        <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@baiViet.IdbaiViet" 
                                            class="text-decoration-none text-dark">@baiViet.TieuDe</a>
                                     </h5>
                                     
@@ -268,7 +268,7 @@
                                 }
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1">
-                                        <a asp-controller="ChuDe" asp-action="Details" asp-route-id="@baiViet.IdbaiViet" 
+                                        <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@baiViet.IdbaiViet" 
                                            class="text-decoration-none text-dark">
                                             @(baiViet.TieuDe.Length > 50 ? baiViet.TieuDe.Substring(0, 50) + "..." : baiViet.TieuDe)
                                         </a>

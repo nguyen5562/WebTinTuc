@@ -41,6 +41,11 @@ app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "baiviet",
+    pattern: "BaiViet/{action=Details}/{id?}",
+    defaults: new { controller = "BaiViet" });
+
+app.MapControllerRoute(
     name: "chude",
     pattern: "ChuDe/{action=Index}",
     defaults: new { controller = "ChuDe" });

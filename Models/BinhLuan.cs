@@ -17,7 +17,7 @@ public partial class BinhLuan
 
     public DateTime? NgayBinhLuan { get; set; }
 
-    public bool? DaDuyet { get; set; }
+    public bool DaDuyet { get; set; }
 
     public virtual BaiViet IdbaiVietNavigation { get; set; } = null!;
 
