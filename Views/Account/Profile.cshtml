@@ -1,0 +1,194 @@
+@model WebTinTuc.Models.NguoiDung
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 mt-4">
+                <div class="card-header bg-info text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>Thông tin cá nhân
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            @if (!string.IsNullOrEmpty(Model.UrlanhDaiDien))
+                            {
+                                <img src="@Model.UrlanhDaiDien" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Ảnh đại diện">
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 150px; height: 150px;">
+                                    <i class="fas fa-user fa-4x text-muted"></i>
+                                </div>
+                            }
+                            <h5 class="text-primary">@Model.HoTen</h5>
+                            <span class="badge bg-primary fs-6">@Model.IdquyenHanNavigation?.TenQuyenHan</span>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fas fa-user me-1"></i>Họ và tên
+                                        </label>
+                                        <p class="form-control-plaintext">@Model.HoTen</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fas fa-envelope me-1"></i>Email
+                                        </label>
+                                        <p class="form-control-plaintext">@Model.Email</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fas fa-phone me-1"></i>Số điện thoại
+                                        </label>
+                                        <p class="form-control-plaintext">@(Model.SoDienThoai ?? "Chưa cập nhật")</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fas fa-user-tag me-1"></i>Quyền hạn
+                                        </label>
+                                        <p class="form-control-plaintext">@Model.IdquyenHanNavigation?.TenQuyenHan</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fas fa-calendar-plus me-1"></i>Ngày đăng ký
+                                        </label>
+                                        <p class="form-control-plaintext">@Model.NgayDangKy.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fas fa-clock me-1"></i>Lần đăng nhập cuối
+                                        </label>
+                                        <p class="form-control-plaintext">
+                                            @if (Model.LanDangNhapCuoi.HasValue)
+                                            {
+                                                @Model.LanDangNhapCuoi.Value.ToString("dd/MM/yyyy HH:mm")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Chưa có</span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-toggle-on me-1"></i>Trạng thái tài khoản
+                                </label>
+                                <p class="form-control-plaintext">
+                                    @if (Model.DaKichHoat == true)
+                                    {
+                                        <span class="badge bg-success">Đã kích hoạt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Chưa kích hoạt</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-newspaper fa-2x text-primary mb-2"></i>
+                                    <h5 class="card-title">Bài viết đã đăng</h5>
+                                    <p class="card-text fs-4 text-primary">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-comments fa-2x text-success mb-2"></i>
+                                    <h5 class="card-title">Bình luận đã viết</h5>
+                                    <p class="card-text fs-4 text-success">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="fas fa-edit me-1"></i>Chỉnh sửa thông tin
+                        </button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Quay lại trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chỉnh sửa thông tin -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Chỉnh sửa thông tin
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="editHoTen" class="form-label">Họ và tên</label>
+                        <input type="text" class="form-control" id="editHoTen" value="@Model.HoTen">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editSoDienThoai" class="form-label">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="editSoDienThoai" value="@Model.SoDienThoai">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAnhDaiDien" class="form-label">URL ảnh đại diện</label>
+                        <input type="url" class="form-control" id="editAnhDaiDien" value="@Model.UrlanhDaiDien" placeholder="https://example.com/avatar.jpg">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Modal functionality sẽ được implement sau
+        console.log('Profile page loaded');
+    </script>
+}
