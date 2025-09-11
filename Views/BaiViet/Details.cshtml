@@ -49,6 +49,24 @@
                     }
                 </div>
 
+                <!-- Action buttons -->
+                @{
+                    var userRole = Context.Session.GetString("UserRole");
+                    var userId = Context.Session.GetString("UserId");
+                    var canEdit = userRole == "Quản trị" || (userRole == "Tác giả" && Model.IdtacGia.ToString() == userId);
+                }
+                @if (canEdit)
+                {
+                    <div class="d-flex gap-2 mb-4">
+                        <a asp-controller="BaiViet" asp-action="Edit" asp-route-id="@Model.IdbaiViet" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>Chỉnh sửa bài viết
+                        </a>
+                        <a asp-controller="BaiViet" asp-action="Manage" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-1"></i>Quản lý bài viết
+                        </a>
+                    </div>
+                }
+
                 <!-- Ảnh bìa -->
                 @if (!string.IsNullOrEmpty(Model.UrlanhBia))
                 {

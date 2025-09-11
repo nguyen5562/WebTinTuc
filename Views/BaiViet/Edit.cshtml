@@ -23,9 +23,9 @@
                     <button type="button" class="btn btn-outline-secondary me-2" id="previewBtn">
                         <i class="fas fa-eye me-1"></i>Xem trước
                     </button>
-                    <button type="button" class="btn btn-primary" id="saveDraftBtn">
+                    <!-- <button type="button" class="btn btn-primary" id="saveDraftBtn">
                         <i class="fas fa-save me-1"></i>Lưu thay đổi
-                    </button>
+                    </button> -->
                 </div>
             </div>
 
@@ -342,6 +342,11 @@
             .then(data => {
                 if (data.success) {
                     showNotification(data.message, 'success');
+                    // Đánh dấu là đã lưu
+                    isSaved = true;
+                    lastSavedContent = document.getElementById('tieuDe').value.trim() + '|' + tinymce.get('noiDung').getContent().trim();
+                    // Xóa draft khỏi localStorage
+                    localStorage.removeItem('articleDraft_' + @Model.IdbaiViet);
                     // Chuyển đến trang chi tiết bài viết
                     setTimeout(() => {
                         window.location.href = '@Url.Action("Details", "BaiViet", new { id = Model.IdbaiViet })';
@@ -361,11 +366,17 @@
 
         // Xử lý nút gửi chờ duyệt
         document.getElementById('publishBtn').addEventListener('click', function() {
+            // Đánh dấu đã lưu ngay khi nhấn nút
+            isSaved = true;
+            lastSavedContent = document.getElementById('tieuDe').value.trim() + '|' + tinymce.get('noiDung').getContent().trim();
             submitForm('publish');
         });
 
         // Xử lý nút lưu bản nháp
         document.getElementById('saveDraftBtn').addEventListener('click', function() {
+            // Đánh dấu đã lưu ngay khi nhấn nút
+            isSaved = true;
+            lastSavedContent = document.getElementById('tieuDe').value.trim() + '|' + tinymce.get('noiDung').getContent().trim();
             submitForm('draft');
         });
 
@@ -464,12 +475,50 @@
             }
         }, 30000);
 
-        // Cảnh báo khi rời trang mà chưa lưu
-        window.addEventListener('beforeunload', function(e) {
+        // Biến để theo dõi trạng thái lưu
+        let isSaved = true;
+        let lastSavedContent = '';
+
+        // Khởi tạo nội dung ban đầu khi trang load
+        function initializeSaveStatus() {
             const tieuDe = document.getElementById('tieuDe').value.trim();
             const noiDung = tinymce.get('noiDung').getContent().trim();
+            lastSavedContent = tieuDe + '|' + noiDung;
+        }
+
+        // Khởi tạo khi DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Đợi TinyMCE load xong
+            setTimeout(initializeSaveStatus, 1000);
+        });
+
+        // Cập nhật trạng thái khi có thay đổi
+        function updateSaveStatus() {
+            const tieuDe = document.getElementById('tieuDe').value.trim();
+            const noiDung = tinymce.get('noiDung').getContent().trim();
+            const currentContent = tieuDe + '|' + noiDung;
             
-            if (tieuDe && noiDung) {
+            if (currentContent !== lastSavedContent) {
+                isSaved = false;
+            } else {
+                isSaved = true;
+            }
+        }
+
+        // Lắng nghe thay đổi trong form
+        document.getElementById('tieuDe').addEventListener('input', updateSaveStatus);
+        document.getElementById('tomTat').addEventListener('input', updateSaveStatus);
+        document.getElementById('urlanhBia').addEventListener('input', updateSaveStatus);
+        document.getElementById('idchuDe').addEventListener('change', updateSaveStatus);
+        
+        // Lắng nghe thay đổi trong TinyMCE
+        tinymce.on('AddEditor', function(e) {
+            e.editor.on('change', updateSaveStatus);
+        });
+
+        // Cảnh báo khi rời trang mà chưa lưu
+        window.addEventListener('beforeunload', function(e) {
+            if (!isSaved) {
                 e.preventDefault();
                 e.returnValue = 'Bạn có thay đổi chưa được lưu. Bạn có chắc chắn muốn rời khỏi trang?';
             }

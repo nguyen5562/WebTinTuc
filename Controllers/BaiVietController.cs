@@ -467,6 +467,146 @@ namespace WebTinTuc.Controllers
             }
         }
 
+        // GET: BaiViet/Manage
+        public async Task<IActionResult> Manage()
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userId = HttpContext.Session.GetString("UserId");
+
+            if (userRole != "Tác giả" && userRole != "Quản trị")
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền truy cập trang này!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            await LoadChuDesForLayout();
+
+            var query = _context.BaiViets
+                .Include(b => b.IdtacGiaNavigation)
+                .Include(b => b.IdchuDeNavigation)
+                .Include(b => b.IdtrangThaiNavigation)
+                .AsQueryable();
+
+            // Tác giả chỉ xem được bài viết của mình
+            if (userRole == "Tác giả")
+            {
+                query = query.Where(b => b.IdtacGia.ToString() == userId);
+            }
+
+            var baiViets = await query
+                .OrderByDescending(b => b.NgayTao)
+                .ToListAsync();
+
+            _logger.LogInformation("Manage page loaded. User: {UserId}, Role: {UserRole}, Articles count: {Count}", 
+                userId, userRole, baiViets.Count);
+
+            ViewBag.UserRole = userRole;
+            ViewBag.UserId = userId;
+
+            return View(baiViets);
+        }
+
+        // POST: BaiViet/ChangeStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeStatus(int id, int newStatus)
+        {
+            try
+            {
+                _logger.LogInformation("ChangeStatus called. ID: {Id}, NewStatus: {NewStatus}", id, newStatus);
+                
+                var userRole = HttpContext.Session.GetString("UserRole");
+                if (userRole != "Quản trị")
+                {
+                    _logger.LogWarning("Unauthorized access to ChangeStatus. UserRole: {UserRole}", userRole);
+                    return Json(new { success = false, message = "Bạn không có quyền thay đổi trạng thái bài viết!" });
+                }
+
+                var baiViet = await _context.BaiViets
+                    .Include(b => b.IdtrangThaiNavigation)
+                    .FirstOrDefaultAsync(b => b.IdbaiViet == id);
+
+                if (baiViet == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bài viết!" });
+                }
+
+                var oldStatus = baiViet.IdtrangThai;
+                
+                // Kiểm tra logic chuyển trạng thái: chỉ cho phép chuyển từ "Chờ duyệt" (ID: 2)
+                if (oldStatus != 2)
+                {
+                    return Json(new { success = false, message = "Chỉ có thể thay đổi trạng thái bài viết đang chờ duyệt!" });
+                }
+
+                // Chỉ cho phép chuyển sang "Đã xuất bản" (ID: 3) hoặc "Bị từ chối" (ID: 4)
+                if (newStatus != 3 && newStatus != 4)
+                {
+                    return Json(new { success = false, message = "Chỉ có thể chuyển sang trạng thái 'Đã xuất bản' hoặc 'Bị từ chối'!" });
+                }
+
+                baiViet.IdtrangThai = newStatus;
+                baiViet.NgayChinhSuaCuoi = DateTime.Now;
+
+                // Nếu chuyển sang "Đã xuất bản" và chưa có ngày xuất bản
+                if (newStatus == 3 && !baiViet.NgayXuatBan.HasValue)
+                {
+                    baiViet.NgayXuatBan = DateTime.Now;
+                }
+
+                await _context.SaveChangesAsync();
+
+                var statusName = await _context.TrangThaiBaiViets
+                    .Where(t => t.IdtrangThai == newStatus)
+                    .Select(t => t.TenTrangThai)
+                    .FirstOrDefaultAsync();
+
+                return Json(new { success = true, message = $"Đã chuyển bài viết sang trạng thái: {statusName}" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thay đổi trạng thái bài viết {BaiVietId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thay đổi trạng thái!" });
+            }
+        }
+
+        // POST: BaiViet/ToggleHot
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleHot(int id)
+        {
+            try
+            {
+                _logger.LogInformation("ToggleHot called. ID: {Id}", id);
+                
+                var userRole = HttpContext.Session.GetString("UserRole");
+                if (userRole != "Quản trị")
+                {
+                    _logger.LogWarning("Unauthorized access to ToggleHot. UserRole: {UserRole}", userRole);
+                    return Json(new { success = false, message = "Bạn không có quyền đánh dấu tin nóng!" });
+                }
+
+                var baiViet = await _context.BaiViets.FindAsync(id);
+                if (baiViet == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bài viết!" });
+                }
+
+                baiViet.LaTinNong = !baiViet.LaTinNong;
+                baiViet.NgayChinhSuaCuoi = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+
+                var message = baiViet.LaTinNong ? "Đã đánh dấu tin nóng" : "Đã bỏ đánh dấu tin nóng";
+                return Json(new { success = true, message = message, isHot = baiViet.LaTinNong });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thay đổi trạng thái tin nóng {BaiVietId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra!" });
+            }
+        }
+
         // Helper method để tạo slug
         private string GenerateSlug(string title)
         {

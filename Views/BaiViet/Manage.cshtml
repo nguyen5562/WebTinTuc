@@ -1,0 +1,401 @@
+@model IEnumerable<WebTinTuc.Models.BaiViet>
+@{
+    ViewData["Title"] = "Quản lý bài viết";
+    var userRole = ViewBag.UserRole as string;
+    var userId = ViewBag.UserId as string;
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-primary mb-1">
+                        <i class="fas fa-list me-2"></i>Quản lý bài viết
+                    </h2>
+                    <p class="text-muted mb-0">
+                        @if (userRole == "Tác giả")
+                        {
+                            <span>Danh sách bài viết của bạn</span>
+                        }
+                        else
+                        {
+                            <span>Quản lý tất cả bài viết trong hệ thống</span>
+                        }
+                    </p>
+                </div>
+                <div>
+                    <a asp-controller="BaiViet" asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Viết bài mới
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">Lọc theo trạng thái</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="1">Bản nháp</option>
+                                <option value="2">Chờ duyệt</option>
+                                <option value="3">Đã xuất bản</option>
+                                <option value="4">Bị từ chối</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="searchInput" class="form-label">Tìm kiếm</label>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Tìm theo tiêu đề...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dateFilter" class="form-label">Lọc theo ngày</label>
+                            <select class="form-select" id="dateFilter">
+                                <option value="">Tất cả thời gian</option>
+                                <option value="today">Hôm nay</option>
+                                <option value="week">Tuần này</option>
+                                <option value="month">Tháng này</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary" id="clearFilters">
+                                <i class="fas fa-times me-1"></i>Xóa bộ lọc
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles List -->
+            <div class="card">
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tiêu đề</th>
+                                        <th>Chủ đề</th>
+                                        <th>Tác giả</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Lượt xem</th>
+                                        @if (userRole == "Quản trị")
+                                        {
+                                            <th>Tin nóng</th>
+                                        }
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var baiViet in Model)
+                                    {
+                                        <tr data-status="@baiViet.IdtrangThai" data-date="@baiViet.NgayTao?.ToString("yyyy-MM-dd")">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (baiViet.UrlanhBia != null)
+                                                    {
+                                                        <img src="@baiViet.UrlanhBia" alt="@baiViet.TieuDe" class="me-3" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                    }
+                                                    <div>
+                                                        <h6 class="mb-1">
+                                                            <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@baiViet.IdbaiViet" class="text-decoration-none">
+                                                                @baiViet.TieuDe
+                                                            </a>
+                                                        </h6>
+                                                        @if (!string.IsNullOrEmpty(baiViet.TomTat))
+                                                        {
+                                                            <small class="text-muted">@(baiViet.TomTat.Length > 100 ? baiViet.TomTat.Substring(0, 100) + "..." : baiViet.TomTat)</small>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@baiViet.IdchuDeNavigation.TenChuDe</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (baiViet.IdtacGiaNavigation.UrlanhDaiDien != null)
+                                                    {
+                                                        <img src="@baiViet.IdtacGiaNavigation.UrlanhDaiDien" alt="@baiViet.IdtacGiaNavigation.HoTen" class="me-2" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                                                    }
+                                                    <span>@baiViet.IdtacGiaNavigation.HoTen</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var statusClass = baiViet.IdtrangThaiNavigation.TenTrangThai switch
+                                                    {
+                                                        "Đã xuất bản" => "success",
+                                                        "Chờ duyệt" => "warning",
+                                                        "Bản nháp" => "secondary",
+                                                        "Bị từ chối" => "danger",
+                                                        _ => "secondary"
+                                                    };
+                                                }
+                                                <span class="badge bg-@statusClass">@baiViet.IdtrangThaiNavigation.TenTrangThai</span>
+                                            </td>
+                                            <td>
+                                                <small>@baiViet.NgayTao?.ToString("dd/MM/yyyy HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark">@baiViet.LuotXem</span>
+                                            </td>
+                                            @if (userRole == "Quản trị")
+                                            {
+                                                <td>
+                                                    <button type="button" class="btn btn-sm @(baiViet.LaTinNong ? "btn-danger" : "btn-outline-danger") toggle-hot-btn" data-id="@baiViet.IdbaiViet">
+                                                        <i class="fas fa-fire"></i>
+                                                    </button>
+                                                </td>
+                                            }
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@baiViet.IdbaiViet" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    @if (userRole == "Quản trị" || (userRole == "Tác giả" && baiViet.IdtacGia.ToString() == userId))
+                                                    {
+                                                        <a asp-controller="BaiViet" asp-action="Edit" asp-route-id="@baiViet.IdbaiViet" class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    }
+                                                    
+                                                    @if (userRole == "Quản trị" && baiViet.IdtrangThai == 2)
+                                                    {
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" title="Thay đổi trạng thái">
+                                                                <i class="fas fa-cog"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a class="dropdown-item change-status-btn" href="#" data-id="@baiViet.IdbaiViet" data-status="3">
+                                                                    <i class="fas fa-check text-success me-2"></i>Đã xuất bản
+                                                                </a></li>
+                                                                <li><a class="dropdown-item change-status-btn" href="#" data-id="@baiViet.IdbaiViet" data-status="4">
+                                                                    <i class="fas fa-times text-danger me-2"></i>Bị từ chối
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Chưa có bài viết nào</h5>
+                            <p class="text-muted">Hãy bắt đầu viết bài viết đầu tiên của bạn!</p>
+                            <a asp-controller="BaiViet" asp-action="Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Viết bài mới
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Function hiển thị thông báo
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Filter functions
+        function filterTable() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const dateFilter = document.getElementById('dateFilter').value;
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                let show = true;
+
+                // Status filter
+                if (statusFilter && row.dataset.status !== statusFilter) {
+                    show = false;
+                }
+
+                // Search filter
+                if (searchInput) {
+                    const title = row.querySelector('h6 a').textContent.toLowerCase();
+                    if (!title.includes(searchInput)) {
+                        show = false;
+                    }
+                }
+
+                // Date filter
+                if (dateFilter) {
+                    const rowDate = new Date(row.dataset.date);
+                    const now = new Date();
+                    let shouldShow = false;
+
+                    switch (dateFilter) {
+                        case 'today':
+                            shouldShow = rowDate.toDateString() === now.toDateString();
+                            break;
+                        case 'week':
+                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            shouldShow = rowDate >= weekAgo;
+                            break;
+                        case 'month':
+                            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                            shouldShow = rowDate >= monthAgo;
+                            break;
+                    }
+
+                    if (!shouldShow) {
+                        show = false;
+                    }
+                }
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        // Event listeners
+        document.getElementById('statusFilter').addEventListener('change', filterTable);
+        document.getElementById('searchInput').addEventListener('input', filterTable);
+        document.getElementById('dateFilter').addEventListener('change', filterTable);
+
+        document.getElementById('clearFilters').addEventListener('click', function() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('dateFilter').value = '';
+            filterTable();
+        });
+
+        // Change status
+        document.querySelectorAll('.change-status-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.dataset.id;
+                const status = this.dataset.status;
+                const statusText = this.textContent.trim();
+
+                console.log('Change status clicked:', { id, status, statusText });
+
+                if (confirm(`Bạn có chắc chắn muốn chuyển bài viết sang trạng thái "${statusText}"?`)) {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    
+                    if (!token) {
+                        console.error('Anti-forgery token not found!');
+                        showNotification('Lỗi bảo mật! Vui lòng tải lại trang.', 'error');
+                        return;
+                    }
+
+                    console.log('Sending request to change status...');
+                    
+                    fetch('@Url.Action("ChangeStatus", "BaiViet")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `id=${id}&newStatus=${status}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Response data:', data);
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Có lỗi xảy ra!', 'error');
+                    });
+                }
+            });
+        });
+
+        // Toggle hot
+        document.querySelectorAll('.toggle-hot-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                console.log('Toggle hot clicked:', { id });
+
+                if (!token) {
+                    console.error('Anti-forgery token not found!');
+                    showNotification('Lỗi bảo mật! Vui lòng tải lại trang.', 'error');
+                    return;
+                }
+
+                console.log('Sending request to toggle hot...');
+
+                fetch('@Url.Action("ToggleHot", "BaiViet")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${id}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        if (data.isHot) {
+                            this.classList.remove('btn-outline-danger');
+                            this.classList.add('btn-danger');
+                        } else {
+                            this.classList.remove('btn-danger');
+                            this.classList.add('btn-outline-danger');
+                        }
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Có lỗi xảy ra!', 'error');
+                });
+            });
+        });
+    </script>
+}

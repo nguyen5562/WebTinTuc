@@ -1,30 +1,83 @@
 ﻿@{
     ViewData["Title"] = "Trang chủ";
     var chuDes = ViewBag.ChuDes as List<WebTinTuc.Models.ChuDe>;
-    var baiVietHot = ViewBag.BaiVietHot as WebTinTuc.Models.BaiViet;
+    var baiVietHot = ViewBag.BaiVietHot as List<WebTinTuc.Models.BaiViet>;
     var baiVietTheoChuDe = ViewBag.BaiVietTheoChuDe as Dictionary<WebTinTuc.Models.ChuDe, List<WebTinTuc.Models.BaiViet>>;
 }
 
 <div class="container-fluid px-0">
     <!-- Bài viết HOT -->
-    @if (baiVietHot != null)
+    @if (baiVietHot != null && baiVietHot.Any())
     {
-        <div class="bg-danger text-white py-3 mb-4">
+        <div class="bg-danger text-white py-4 mb-4">
             <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <span class="badge bg-warning text-dark fs-6 px-3 py-2">
-                            <i class="fas fa-fire me-1"></i>HOT
-                        </span>
-                    </div>
+                <div class="row align-items-center mb-3">
                     <div class="col">
-                        <h4 class="mb-0">@baiVietHot.TieuDe</h4>
-                        <small>@baiVietHot.TomTat</small>
-                    </div>
-                    <div class="col-auto">
-                        <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@baiVietHot.IdbaiViet" class="btn btn-light btn-sm">Đọc ngay</a>
+                        <h3 class="mb-0">
+                            <i class="fas fa-fire me-2"></i>TIN NÓNG
+                        </h3>
                     </div>
                 </div>
+                
+                @if (baiVietHot.Count == 1)
+                {
+                    <!-- Hiển thị 1 tin nóng lớn -->
+                    var tinNong = baiVietHot.First();
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                <i class="fas fa-fire me-1"></i>HOT
+                            </span>
+                        </div>
+                        <div class="col">
+                            <h4 class="mb-1">@tinNong.TieuDe</h4>
+                            <small class="opacity-75">@tinNong.TomTat</small>
+                        </div>
+                        <div class="col-auto">
+                            <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@tinNong.IdbaiViet" class="btn btn-light btn-sm">Đọc ngay</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Hiển thị nhiều tin nóng dạng carousel -->
+                    <div id="hotNewsCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @for (int i = 0; i < baiVietHot.Count; i++)
+                            {
+                                var tinNong = baiVietHot[i];
+                                <div class="carousel-item @(i == 0 ? "active" : "")">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                                <i class="fas fa-fire me-1"></i>HOT
+                                            </span>
+                                        </div>
+                                        <div class="col">
+                                            <h4 class="mb-1">@tinNong.TieuDe</h4>
+                                            <small class="opacity-75">@tinNong.TomTat</small>
+                                        </div>
+                                        <div class="col-auto">
+                                            <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@tinNong.IdbaiViet" class="btn btn-light btn-sm">Đọc ngay</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        @if (baiVietHot.Count > 1)
+                        {
+                            <button class="carousel-control-prev" type="button" data-bs-target="#hotNewsCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#hotNewsCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        }
+                    </div>
+                }
             </div>
         </div>
     }

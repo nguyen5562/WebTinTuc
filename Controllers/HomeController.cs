@@ -25,15 +25,15 @@ namespace WebTinTuc.Controllers
                 .OrderBy(c => c.ThuTuHienThi)
                 .ToListAsync();
 
-            // Lấy bài viết hot nhất (có nhãn HOT và đã xuất bản)
+            // Lấy các bài viết hot (có nhãn HOT và đã xuất bản)
             var baiVietHot = await _context.BaiViets
                 .Include(b => b.IdtacGiaNavigation)
                 .Include(b => b.IdchuDeNavigation)
                 .Include(b => b.IdtrangThaiNavigation)
                 .Where(b => b.LaTinNong == true && b.IdtrangThaiNavigation.TenTrangThai == "Đã xuất bản")
                 .OrderByDescending(b => b.NgayXuatBan)
-                .Take(1)
-                .FirstOrDefaultAsync();
+                .Take(5) // Lấy tối đa 5 tin nóng
+                .ToListAsync();
 
             // Lấy bài viết theo từng chủ đề (3-4 bài mới nhất mỗi chủ đề)
             var baiVietTheoChuDe = new Dictionary<ChuDe, List<BaiViet>>();
@@ -56,7 +56,7 @@ namespace WebTinTuc.Controllers
             }
 
             ViewBag.ChuDes = chuDes;
-            ViewBag.BaiVietHot = baiVietHot;
+            ViewBag.BaiVietHot = baiVietHot; // Bây giờ là List<BaiViet> thay vì BaiViet
             ViewBag.BaiVietTheoChuDe = baiVietTheoChuDe;
 
             return View();

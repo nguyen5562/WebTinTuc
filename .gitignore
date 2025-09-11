@@ -36,3 +36,4 @@ bld/
 # Others
 node_modules/
 wwwroot/lib/
+wwwroot/uploads/

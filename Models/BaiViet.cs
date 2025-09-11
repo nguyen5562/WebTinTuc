@@ -29,7 +29,7 @@ public partial class BaiViet
 
     public DateTime? NgayChinhSuaCuoi { get; set; }
 
-    public bool? LaTinNong { get; set; }
+    public bool LaTinNong { get; set; }
 
     public int? LuotXem { get; set; }
 
