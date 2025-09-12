@@ -124,9 +124,9 @@ INSERT INTO TrangThaiBaiViet (TenTrangThai, MoTa) VALUES
 -- 4. Thêm dữ liệu mẫu cho bảng NguoiDung
 -- Mật khẩu mặc định cho tất cả user là: 123456
 INSERT INTO NguoiDung (HoTen, Email, SoDienThoai, MatKhauHash, NgayDangKy, DaKichHoat, IDQuyenHan) VALUES
-(N'Nguyễn Văn Admin', 'admin@webtintuc.com', '0123456789', 'jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=', '2025-01-01 00:00:00', 1, 3),
-(N'Trần Thị Tác Giả', 'tacgia@webtintuc.com', '0987654321', 'jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=', '2025-01-01 00:00:00', 1, 2),
-(N'Lê Văn Đọc Giả', 'docgia@webtintuc.com', '0369852147', 'jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=', '2025-01-01 00:00:00', 1, 1);
+(N'Nguyễn Văn Admin', 'admin@gmail.com', '0123456789', 'jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=', '2025-01-01 00:00:00', 1, 3),
+(N'Trần Thị Tác Giả', 'tacgia@gmail.com', '0987654321', 'jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=', '2025-01-01 00:00:00', 1, 2),
+(N'Lê Văn Đọc Giả', 'docgia@gmail.com', '0369852147', 'jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=', '2025-01-01 00:00:00', 1, 1);
 
 -- 5. Thêm dữ liệu mẫu cho bảng BaiViet
 INSERT INTO BaiViet (TieuDe, Slug, TomTat, NoiDung, IDTacGia, IDChuDe, IDTrangThai, NgayTao, NgayXuatBan, LaTinNong, LuotXem) VALUES

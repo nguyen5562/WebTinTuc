@@ -56,6 +56,31 @@ app.MapControllerRoute(
     pattern: "BaiViet/Edit/{id}",
     defaults: new { controller = "BaiViet", action = "Edit" });
 
+app.MapControllerRoute(
+    name: "baiviet-upload",
+    pattern: "BaiViet/UploadImage",
+    defaults: new { controller = "BaiViet", action = "UploadImage" });
+
+app.MapControllerRoute(
+    name: "baiviet-addcomment",
+    pattern: "BaiViet/AddComment",
+    defaults: new { controller = "BaiViet", action = "AddComment" });
+
+app.MapControllerRoute(
+    name: "baiviet-togglecomment",
+    pattern: "BaiViet/ToggleCommentStatus",
+    defaults: new { controller = "BaiViet", action = "ToggleCommentStatus" });
+
+app.MapControllerRoute(
+    name: "baiviet-changestatus",
+    pattern: "BaiViet/ChangeStatus",
+    defaults: new { controller = "BaiViet", action = "ChangeStatus" });
+
+app.MapControllerRoute(
+    name: "baiviet-togglehot",
+    pattern: "BaiViet/ToggleHot",
+    defaults: new { controller = "BaiViet", action = "ToggleHot" });
+
 // Route cho slug bài viết
 app.MapControllerRoute(
     name: "baiviet",

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebTinTuc.Models;
+using System.Text.RegularExpressions;
 
 namespace WebTinTuc.Controllers
 {
@@ -244,7 +245,9 @@ namespace WebTinTuc.Controllers
                     return Json(new { success = false, message = "Tiêu đề phải có ít nhất 5 ký tự!" });
                 }
 
-                if (string.IsNullOrEmpty(noiDung) || noiDung.Trim().Length < 50)
+                // Kiểm tra nội dung HTML - loại bỏ HTML tags để đếm text thực tế
+                var textContent = Regex.Replace(noiDung ?? "", "<.*?>", "").Trim();
+                if (string.IsNullOrEmpty(textContent) || textContent.Length < 50)
                 {
                     return Json(new { success = false, message = "Nội dung phải có ít nhất 50 ký tự!" });
                 }
@@ -390,7 +393,9 @@ namespace WebTinTuc.Controllers
                     return Json(new { success = false, message = "Tiêu đề phải có ít nhất 5 ký tự!" });
                 }
 
-                if (string.IsNullOrEmpty(noiDung) || noiDung.Trim().Length < 50)
+                // Kiểm tra nội dung HTML - loại bỏ HTML tags để đếm text thực tế
+                var textContent = Regex.Replace(noiDung ?? "", "<.*?>", "").Trim();
+                if (string.IsNullOrEmpty(textContent) || textContent.Length < 50)
                 {
                     return Json(new { success = false, message = "Nội dung phải có ít nhất 50 ký tự!" });
                 }
@@ -641,16 +646,32 @@ namespace WebTinTuc.Controllers
             if (string.IsNullOrEmpty(title))
                 return string.Empty;
 
-            // Chuyển về chữ thường và loại bỏ dấu
+            // Chuyển về chữ thường
             var slug = title.ToLowerInvariant();
             
-            // Thay thế các ký tự đặc biệt
-            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\s-]", "");
-            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"\s+", " ").Trim();
+            // Xử lý tiếng Việt - thay thế các ký tự có dấu
+            slug = slug.Replace("á", "a").Replace("à", "a").Replace("ả", "a").Replace("ã", "a").Replace("ạ", "a");
+            slug = slug.Replace("ă", "a").Replace("ắ", "a").Replace("ằ", "a").Replace("ẳ", "a").Replace("ẵ", "a").Replace("ặ", "a");
+            slug = slug.Replace("â", "a").Replace("ấ", "a").Replace("ầ", "a").Replace("ẩ", "a").Replace("ẫ", "a").Replace("ậ", "a");
+            slug = slug.Replace("é", "e").Replace("è", "e").Replace("ẻ", "e").Replace("ẽ", "e").Replace("ẹ", "e");
+            slug = slug.Replace("ê", "e").Replace("ế", "e").Replace("ề", "e").Replace("ể", "e").Replace("ễ", "e").Replace("ệ", "e");
+            slug = slug.Replace("í", "i").Replace("ì", "i").Replace("ỉ", "i").Replace("ĩ", "i").Replace("ị", "i");
+            slug = slug.Replace("ó", "o").Replace("ò", "o").Replace("ỏ", "o").Replace("õ", "o").Replace("ọ", "o");
+            slug = slug.Replace("ô", "o").Replace("ố", "o").Replace("ồ", "o").Replace("ổ", "o").Replace("ỗ", "o").Replace("ộ", "o");
+            slug = slug.Replace("ơ", "o").Replace("ớ", "o").Replace("ờ", "o").Replace("ở", "o").Replace("ỡ", "o").Replace("ợ", "o");
+            slug = slug.Replace("ú", "u").Replace("ù", "u").Replace("ủ", "u").Replace("ũ", "u").Replace("ụ", "u");
+            slug = slug.Replace("ư", "u").Replace("ứ", "u").Replace("ừ", "u").Replace("ử", "u").Replace("ữ", "u").Replace("ự", "u");
+            slug = slug.Replace("ý", "y").Replace("ỳ", "y").Replace("ỷ", "y").Replace("ỹ", "y").Replace("ỵ", "y");
+            slug = slug.Replace("đ", "d");
+            
+            // Thay thế các ký tự đặc biệt khác
+            slug = Regex.Replace(slug, @"[^a-z0-9\s-]", "");
+            slug = Regex.Replace(slug, @"\s+", " ").Trim();
             slug = slug.Replace(" ", "-");
             
-            // Loại bỏ dấu gạch ngang liên tiếp
-            slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-+", "-");
+            // Loại bỏ dấu gạch ngang liên tiếp và ở đầu/cuối
+            slug = Regex.Replace(slug, @"-+", "-");
+            slug = slug.Trim('-');
             
             return slug;
         }

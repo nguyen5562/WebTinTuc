@@ -78,11 +78,11 @@
                 <!-- Tóm tắt -->
                 @if (!string.IsNullOrEmpty(Model.TomTat))
                 {
-                    <div class="alert alert-light border-start border-primary border-4 mb-4">
-                        <h5 class="alert-heading mb-2">
-                            <i class="fas fa-quote-left text-primary me-2"></i>Tóm tắt
+                    <div class="bg-light border-start border-primary border-4 p-4 mb-4 rounded">
+                        <h5 class="text-primary mb-2">
+                            <i class="fas fa-quote-left me-2"></i>Tóm tắt
                         </h5>
-                        <p class="mb-0 fst-italic">@Model.TomTat</p>
+                        <p class="mb-0 fst-italic text-muted">@Model.TomTat</p>
                     </div>
                 }
 
@@ -134,9 +134,9 @@
                 }
                 else
                 {
-                    <div class="alert alert-info">
+                    <div class="bg-info text-white p-3 rounded mb-3">
                         <i class="fas fa-info-circle me-2"></i>
-                        <a asp-controller="Account" asp-action="Login" class="alert-link">Đăng nhập</a> 
+                        <a asp-controller="Account" asp-action="Login" class="text-white text-decoration-underline">Đăng nhập</a> 
                         để có thể bình luận bài viết này.
                     </div>
                 }

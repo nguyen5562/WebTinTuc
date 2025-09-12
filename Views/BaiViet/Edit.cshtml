@@ -118,11 +118,11 @@
                                 </div>
 
                                 <!-- Hiển thị trạng thái hiện tại -->
-                                <div class="alert alert-info">
-                                    <h6 class="alert-heading">
+                                <div class="bg-info text-white p-3 rounded mb-3">
+                                    <h6 class="text-white mb-2">
                                         <i class="fas fa-info-circle me-1"></i>Trạng thái hiện tại
                                     </h6>
-                                    <hr>
+                                    <hr class="text-white">
                                     <span class="badge bg-@(Model.IdtrangThaiNavigation.TenTrangThai == "Đã xuất bản" ? "success" : Model.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt" ? "warning" : "secondary")">
                                         @Model.IdtrangThaiNavigation.TenTrangThai
                                     </span>
@@ -136,11 +136,11 @@
                                 <!-- Đánh dấu tin nóng sẽ được quản lý bởi trang quản trị -->
 
                                 <!-- Thông tin bài viết -->
-                                <div class="alert alert-info">
-                                    <h6 class="alert-heading">
+                                <div class="bg-info text-white p-3 rounded mb-3">
+                                    <h6 class="text-white mb-2">
                                         <i class="fas fa-info-circle me-1"></i>Thông tin bài viết
                                     </h6>
-                                    <hr>
+                                    <hr class="text-white">
                                     <small>
                                         <strong>Tác giả:</strong> @Model.IdtacGiaNavigation.HoTen<br>
                                         <strong>Ngày tạo:</strong> @Model.NgayTao?.ToString("dd/MM/yyyy HH:mm")<br>
@@ -261,35 +261,97 @@
                 table: { title: 'Table', items: 'inserttable | cell row column | tableprops deletetable' },
                 help: { title: 'Help', items: 'help' }
             },
-            images_upload_handler: function (blobInfo, success, failure) {
-                var xhr, formData;
-                xhr = new XMLHttpRequest();
-                xhr.withCredentials = false;
-                xhr.open('POST', '@Url.Action("UploadImage", "BaiViet")');
-                
-                xhr.onload = function() {
-                    var json;
-                    if (xhr.status != 200) {
-                        failure('HTTP Error: ' + xhr.status);
-                        return;
-                    }
-                    json = JSON.parse(xhr.responseText);
-                    if (!json || typeof json.url != 'string') {
-                        failure('Invalid JSON: ' + xhr.responseText);
-                        return;
-                    }
-                    success(json.url);
-                };
-                
-                formData = new FormData();
-                formData.append('upload', blobInfo.blob(), blobInfo.filename());
-                formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
-                
-                xhr.send(formData);
+            images_upload_handler: function (blobInfo, success, failure, progress) {
+                return new Promise(function (resolve, reject) {
+                    var xhr, formData;
+                    xhr = new XMLHttpRequest();
+                    xhr.withCredentials = false;
+                    xhr.open('POST', '@Url.Action("UploadImage", "BaiViet")');
+                    
+                    xhr.upload.onprogress = function (e) {
+                        if (e.lengthComputable) {
+                            progress(e.loaded / e.total * 100);
+                        }
+                    };
+                    
+                    xhr.onload = function() {
+                        var json;
+                        if (xhr.status != 200) {
+                            failure('HTTP Error: ' + xhr.status);
+                            reject('HTTP Error: ' + xhr.status);
+                            return;
+                        }
+                        try {
+                            json = JSON.parse(xhr.responseText);
+                        } catch (e) {
+                            failure('Invalid JSON: ' + xhr.responseText);
+                            reject('Invalid JSON: ' + xhr.responseText);
+                            return;
+                        }
+                        if (!json || typeof json.url != 'string') {
+                            failure('Invalid response: ' + xhr.responseText);
+                            reject('Invalid response: ' + xhr.responseText);
+                            return;
+                        }
+                        success(json.url);
+                        resolve(json.url);
+                    };
+                    
+                    xhr.onerror = function() {
+                        failure('Network error occurred');
+                        reject('Network error occurred');
+                    };
+                    
+                    formData = new FormData();
+                    formData.append('upload', blobInfo.blob(), blobInfo.filename());
+                    formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+                    
+                    xhr.send(formData);
+                });
             },
+            // Image tools configuration
+            image_advtab: true,
+            image_caption: true,
+            image_title: true,
+            image_description: true,
+            image_dimensions: true,
+            image_class_list: [
+                {title: 'None', value: ''},
+                {title: 'Left Align', value: 'image-left'},
+                {title: 'Right Align', value: 'image-right'},
+                {title: 'Center Align', value: 'image-center'},
+                {title: 'Full Width', value: 'image-full-width'},
+                {title: 'Float Left', value: 'image-float-left'},
+                {title: 'Float Right', value: 'image-float-right'}
+            ],
+            // Context menu for images
+            contextmenu: 'link image imagetools table spellchecker configurepermanentpen',
+            // Image resize handles
+            image_resize: true,
+            // Image upload progress
+            images_upload_base_path: '/uploads/images/',
+            // Custom CSS for image alignment
+            content_css: [
+                '//cdn.jsdelivr.net/npm/tinymce@6.7.2/skins/ui/oxide/content.min.css',
+                '//cdn.jsdelivr.net/npm/tinymce@6.7.2/skins/ui/oxide/skin.min.css'
+            ],
             setup: function (editor) {
                 editor.on('init', function () {
                     // Không cần set content vì đã có sẵn từ model
+                });
+                
+                // Add custom CSS for image alignment
+                editor.on('init', function() {
+                    var style = editor.getDoc().createElement('style');
+                    style.innerHTML = `
+                        .image-left { float: left; margin: 0 10px 10px 0; }
+                        .image-right { float: right; margin: 0 0 10px 10px; }
+                        .image-center { display: block; margin: 10px auto; }
+                        .image-full-width { width: 100%; height: auto; }
+                        .image-float-left { float: left; margin: 0 10px 10px 0; }
+                        .image-float-right { float: right; margin: 0 0 10px 10px; }
+                    `;
+                    editor.getDoc().head.appendChild(style);
                 });
             }
         });
@@ -320,9 +382,11 @@
                 return;
             }
             
+            // Cập nhật textarea với nội dung từ TinyMCE trước khi tạo FormData
+            tinymce.get('noiDung').save();
+            
             const formData = new FormData(document.getElementById('editArticleForm'));
             formData.append('actionType', actionType);
-            formData.append('noiDung', tinymce.get('noiDung').getContent());
             
             const submitBtn = document.getElementById(actionType === 'publish' ? 'publishBtn' : 'saveDraftBtn');
             const originalText = submitBtn.innerHTML;
@@ -432,6 +496,7 @@
             // Validate tiêu đề
             if (!tieuDe || tieuDe.length < 5) {
                 document.getElementById('tieuDe').classList.add('is-invalid');
+                showNotification('Vui lòng nhập tiêu đề bài viết!', 'error');
                 isValid = false;
             } else {
                 document.getElementById('tieuDe').classList.remove('is-invalid');
@@ -440,13 +505,15 @@
             // Validate chủ đề
             if (!idchuDe) {
                 document.getElementById('idchuDe').classList.add('is-invalid');
+                showNotification('Vui lòng chọn chủ đề!', 'error');
                 isValid = false;
             } else {
                 document.getElementById('idchuDe').classList.remove('is-invalid');
             }
             
-            // Validate nội dung
-            if (!noiDung || noiDung.length < 50) {
+            // Validate nội dung - kiểm tra text content thực tế, không phải HTML
+            const textContent = tinymce.get('noiDung').getContent({format: 'text'}).trim();
+            if (!textContent || textContent.length < 50) {
                 showNotification('Nội dung phải có ít nhất 50 ký tự!', 'error');
                 isValid = false;
             }
