@@ -39,8 +39,7 @@
             <!-- Tìm kiếm -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <form method="get" asp-controller="ChuDe" asp-action="Index" asp-route-slug="@chuDe?.Slug">
-                        <input type="hidden" name="slug" value="@chuDe?.Slug" />
+                    <form method="get" action="/ChuDe/@chuDe?.Slug">
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="input-group">
@@ -54,7 +53,7 @@
                             <div class="col-md-4">
                                 @if (!string.IsNullOrEmpty(search))
                                 {
-                                    <a asp-controller="ChuDe" asp-action="Index" asp-route-slug="@chuDe?.Slug" 
+                                    <a href="/ChuDe/@chuDe?.Slug" 
                                        class="btn btn-outline-secondary">
                                         <i class="fas fa-times me-1"></i>Xóa tìm kiếm
                                     </a>
@@ -97,7 +96,7 @@
                                 
                                 <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">
-                                        <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@baiViet.IdbaiViet" 
+                                        <a href="/BaiViet/@baiViet.Slug" 
                                            class="text-decoration-none text-dark">@baiViet.TieuDe</a>
                                     </h5>
                                     
@@ -154,8 +153,7 @@
                             @if (hasPreviousPage)
                             {
                                 <li class="page-item">
-                                    <a class="page-link" asp-controller="ChuDe" asp-action="Index" 
-                                       asp-route-slug="@chuDe?.Slug" asp-route-search="@search" asp-route-page="@(currentPage - 1)">
+                                    <a class="page-link" href="/ChuDe/@chuDe?.Slug?search=@search&page=@(currentPage - 1)">
                                         <i class="fas fa-chevron-left"></i> Trước
                                     </a>
                                 </li>
@@ -164,16 +162,14 @@
                             @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
                             {
                                 <li class="page-item @(i == currentPage ? "active" : "")">
-                                    <a class="page-link" asp-controller="ChuDe" asp-action="Index" 
-                                       asp-route-slug="@chuDe?.Slug" asp-route-search="@search" asp-route-page="@i">@i</a>
+                                    <a class="page-link" href="/ChuDe/@chuDe?.Slug?search=@search&page=@i">@i</a>
                                 </li>
                             }
 
                             @if (hasNextPage)
                             {
                                 <li class="page-item">
-                                    <a class="page-link" asp-controller="ChuDe" asp-action="Index" 
-                                       asp-route-slug="@chuDe?.Slug" asp-route-search="@search" asp-route-page="@(currentPage + 1)">
+                                    <a class="page-link" href="/ChuDe/@chuDe?.Slug?search=@search&page=@(currentPage + 1)">
                                         Sau <i class="fas fa-chevron-right"></i>
                                     </a>
                                 </li>
@@ -208,7 +204,7 @@
                     </p>
                     @if (!string.IsNullOrEmpty(search))
                     {
-                        <a asp-controller="ChuDe" asp-action="Index" asp-route-slug="@chuDe?.Slug" 
+                        <a href="/ChuDe/@chuDe?.Slug" 
                            class="btn btn-primary">
                             <i class="fas fa-list me-1"></i>Xem tất cả bài viết
                         </a>
@@ -231,7 +227,7 @@
                             @foreach (var chuDeKhac in chuDesKhac)
                             {
                                 <li class="mb-2">
-                                    <a asp-controller="ChuDe" asp-action="Index" asp-route-slug="@chuDeKhac.Slug" 
+                                    <a href="/ChuDe/@chuDeKhac.Slug" 
                                        class="text-decoration-none d-flex justify-content-between align-items-center">
                                         <span>@chuDeKhac.TenChuDe</span>
                                         <i class="fas fa-chevron-right text-muted"></i>
@@ -268,7 +264,7 @@
                                 }
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1">
-                                        <a asp-controller="BaiViet" asp-action="Details" asp-route-id="@baiViet.IdbaiViet" 
+                                        <a href="/BaiViet/@baiViet.Slug" 
                                            class="text-decoration-none text-dark">
                                             @(baiViet.TieuDe.Length > 50 ? baiViet.TieuDe.Substring(0, 50) + "..." : baiViet.TieuDe)
                                         </a>

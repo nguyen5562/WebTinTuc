@@ -99,7 +99,7 @@
                                     {
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
-                                            <a class="dropdown-item" href="#">
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
                                                 <i class="fas fa-cogs me-1"></i>Quản trị hệ thống
                                             </a>
                                         </li>
@@ -142,7 +142,7 @@
                         {
                             @foreach (var chuDe in chuDes)
                             {
-                                <a class="nav-link text-dark fw-semibold me-4" asp-controller="ChuDe" asp-action="Index" asp-route-slug="@chuDe.Slug">
+                                <a class="nav-link text-dark fw-semibold me-4" href="/ChuDe/@chuDe.Slug">
                                     @chuDe.TenChuDe.ToUpper()
                                 </a>
                             }
@@ -162,7 +162,7 @@
         </div>
     </header>
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" class="pb-3" style="padding-top: 20px;">
             @RenderBody()
         </main>
     </div>
@@ -195,7 +195,7 @@
                                     @foreach (var chuDe in chuDesFooter.Take((chuDesFooter.Count + 1) / 2))
                                     {
                                         <li>
-                                            <a asp-controller="ChuDe" asp-action="Index" asp-route-slug="@chuDe.Slug" 
+                                            <a href="/ChuDe/@chuDe.Slug" 
                                                class="text-muted text-decoration-none">@chuDe.TenChuDe</a>
                                         </li>
                                     }
@@ -206,7 +206,7 @@
                                     @foreach (var chuDe in chuDesFooter.Skip((chuDesFooter.Count + 1) / 2))
                                     {
                                         <li>
-                                            <a asp-controller="ChuDe" asp-action="Index" asp-route-slug="@chuDe.Slug" 
+                                            <a href="/ChuDe/@chuDe.Slug" 
                                                class="text-muted text-decoration-none">@chuDe.TenChuDe</a>
                                         </li>
                                     }
@@ -260,5 +260,10 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    
+    <style>
+        /* Dropdown submenu */
+    </style>
 </body>
 </html>
+

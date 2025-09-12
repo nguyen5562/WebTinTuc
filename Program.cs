@@ -42,13 +42,14 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "baiviet",
-    pattern: "BaiViet/{action=Details}/{id?}",
-    defaults: new { controller = "BaiViet" });
+    pattern: "BaiViet/{slug?}",
+    defaults: new { controller = "BaiViet", action = "Details" });
 
 app.MapControllerRoute(
     name: "chude",
-    pattern: "ChuDe/{action=Index}",
-    defaults: new { controller = "ChuDe" });
+    pattern: "ChuDe/{slug?}",
+    defaults: new { controller = "ChuDe", action = "Index" });
+    
 
 app.MapControllerRoute(
     name: "default",

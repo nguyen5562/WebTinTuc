@@ -1,0 +1,313 @@
+@model IEnumerable<WebTinTuc.Models.ChuDe>
+@{
+    ViewData["Title"] = "Quản lý chủ đề";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-tags me-2"></i>Quản lý chủ đề
+                </h1>
+                <a asp-controller="Admin" asp-action="CreateChuDe" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Thêm chủ đề mới
+                </a>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Danh sách chủ đề</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th width="30"><i class="fas fa-grip-vertical text-muted"></i></th>
+                                        <th>ID</th>
+                                        <th>Tên chủ đề</th>
+                                        <th>Slug</th>
+                                        <th>Thứ tự</th>
+                                        <th>Trạng thái</th>
+                                        <th>Số bài viết</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var chuDe in Model)
+                                    {
+                                        <tr data-id="@chuDe.IdchuDe" class="sortable-row">
+                                            <td class="drag-handle" style="cursor: move;"><i class="fas fa-grip-vertical text-muted"></i></td>
+                                            <td>@chuDe.IdchuDe</td>
+                                            <td>
+                                                <strong>@chuDe.TenChuDe</strong>
+                                            </td>
+                                            <td>
+                                                <code class="text-primary">@chuDe.Slug</code>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary order-badge">@(chuDe.ThuTuHienThi ?? 0)</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(chuDe.DaKichHoat == true ? "bg-success" : "bg-danger")">
+                                                    @(chuDe.DaKichHoat == true ? "Kích hoạt" : "Tắt")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@chuDe.BaiViets.Count</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-controller="Admin" asp-action="EditChuDe" asp-route-id="@chuDe.IdchuDe" 
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger delete-chu-de-btn" 
+                                                            data-id="@chuDe.IdchuDe" data-ten="@chuDe.TenChuDe" data-count="@chuDe.BaiViets.Count">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Chưa có chủ đề nào</h5>
+                            <p class="text-muted">Hãy thêm chủ đề đầu tiên!</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="deleteChuDeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa chủ đề <strong id="deleteChuDeName"></strong>?</p>
+                <div id="deleteWarning" class="alert alert-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Chủ đề này có <span id="deleteArticleCount"></span> bài viết. Không thể xóa!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteChuDe">
+                    <i class="fas fa-trash me-1"></i>Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        // Khởi tạo drag & drop
+        document.addEventListener('DOMContentLoaded', function() {
+            const tbody = document.querySelector('tbody');
+            if (tbody) {
+                new Sortable(tbody, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    onEnd: function(evt) {
+                        updateOrder();
+                    }
+                });
+            }
+        });
+
+        // Cập nhật thứ tự sau khi kéo thả
+        function updateOrder() {
+            const rows = document.querySelectorAll('.sortable-row');
+            const orders = [];
+            
+            rows.forEach((row, index) => {
+                const id = row.getAttribute('data-id');
+                orders.push({
+                    id: parseInt(id),
+                    order: index + 1
+                });
+            });
+            
+            // Gửi request cập nhật thứ tự
+            const formData = new FormData();
+            formData.append('orders', JSON.stringify(orders));
+            formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+            
+            fetch('@Url.Action("UpdateOrder", "Admin")', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Đã cập nhật thứ tự hiển thị!', 'success');
+                    // Cập nhật số thứ tự hiển thị
+                    updateOrderNumbers();
+                    // Auto-reload trang sau 1.5 giây để cập nhật header/footer
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(data.message, 'error');
+                    // Reload trang để khôi phục thứ tự cũ
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                showNotification('Có lỗi xảy ra!', 'error');
+                window.location.reload();
+            });
+        }
+
+        // Cập nhật số thứ tự hiển thị
+        function updateOrderNumbers() {
+            const rows = document.querySelectorAll('.sortable-row');
+            rows.forEach((row, index) => {
+                const orderBadge = row.querySelector('.order-badge');
+                if (orderBadge) {
+                    orderBadge.textContent = index + 1;
+                }
+            });
+        }
+
+        // Xử lý nút xóa
+        document.querySelectorAll('.delete-chu-de-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const ten = this.getAttribute('data-ten');
+                const count = parseInt(this.getAttribute('data-count'));
+                
+                document.getElementById('deleteChuDeName').textContent = ten;
+                document.getElementById('deleteArticleCount').textContent = count;
+                document.getElementById('confirmDeleteChuDe').setAttribute('data-id', id);
+                
+                const warningDiv = document.getElementById('deleteWarning');
+                if (count > 0) {
+                    warningDiv.style.display = 'block';
+                    document.getElementById('confirmDeleteChuDe').disabled = true;
+                } else {
+                    warningDiv.style.display = 'none';
+                    document.getElementById('confirmDeleteChuDe').disabled = false;
+                }
+                
+                const modal = new bootstrap.Modal(document.getElementById('deleteChuDeModal'));
+                modal.show();
+            });
+        });
+
+        // Xử lý xác nhận xóa
+        document.getElementById('confirmDeleteChuDe').addEventListener('click', function() {
+            if (this.disabled) return;
+            
+            const id = this.getAttribute('data-id');
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+            
+            fetch('@Url.Action("DeleteChuDe", "Admin")', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Có lỗi xảy ra!', 'error');
+            });
+        });
+
+        // Hàm hiển thị thông báo
+        function showNotification(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas ${icon} me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+    </script>
+    
+    <style>
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #f8f9fa;
+        }
+        
+        .sortable-chosen {
+            background: #e3f2fd;
+        }
+        
+        .drag-handle:hover {
+            color: #007bff !important;
+        }
+        
+        .sortable-row {
+            transition: all 0.3s ease;
+        }
+    </style>
+}

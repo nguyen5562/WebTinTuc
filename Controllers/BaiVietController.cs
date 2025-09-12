@@ -13,10 +13,10 @@ namespace WebTinTuc.Controllers
             _logger = logger;
         }
 
-        // GET: BaiViet/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: BaiViet/Details/slug
+        public async Task<IActionResult> Details(string slug)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(slug))
             {
                 return NotFound();
             }
@@ -36,7 +36,7 @@ namespace WebTinTuc.Controllers
                 .Include(b => b.BinhLuans.Where(c => isAdmin || c.DaDuyet == true))
                     .ThenInclude(c => c.InverseIdbinhLuanChaNavigation.Where(cc => isAdmin || cc.DaDuyet == true))
                         .ThenInclude(cc => cc.IdnguoiDungNavigation)
-                .FirstOrDefaultAsync(b => b.IdbaiViet == id);
+                .FirstOrDefaultAsync(b => b.Slug == slug);
 
             if (baiViet == null)
             {
