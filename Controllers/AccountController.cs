@@ -63,7 +63,7 @@ namespace WebTinTuc.Controllers
                 user.LanDangNhapCuoi = DateTime.Now;
                 await _context.SaveChangesAsync();
 
-                // TempData["SuccessMessage"] = $"Chào mừng {user.HoTen} quay trở lại!";
+                TempData["SuccessMessage"] = $"Chào mừng {user.HoTen} quay trở lại!";
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -145,7 +145,7 @@ namespace WebTinTuc.Controllers
                 _context.NguoiDungs.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                // TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.";
+                TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
@@ -160,7 +160,7 @@ namespace WebTinTuc.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            // TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công!";
+            TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công!";
             return RedirectToAction("Index", "Home");
         }
 
