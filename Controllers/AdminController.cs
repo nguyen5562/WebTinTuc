@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebTinTuc.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace WebTinTuc.Controllers
 {
@@ -272,8 +274,15 @@ namespace WebTinTuc.Controllers
                         return View(chuDe);
                     }
 
-                    // ChuDe không có trường NgayCapNhat
-                    _context.Update(chuDe);
+                    // Cập nhật chỉ các trường cần thiết (không bao gồm DaKichHoat)
+                    var chuDeToUpdate = await _context.ChuDes.FindAsync(id);
+                    if (chuDeToUpdate != null)
+                    {
+                        chuDeToUpdate.TenChuDe = chuDe.TenChuDe;
+                        chuDeToUpdate.Slug = chuDe.Slug;
+                        chuDeToUpdate.ThuTuHienThi = chuDe.ThuTuHienThi;
+                        // Không cập nhật DaKichHoat - chỉ quản lý qua toggle button
+                    }
                     await _context.SaveChangesAsync();
                     
                     _logger.LogInformation("Admin đã cập nhật chủ đề: {TenChuDe}", chuDe.TenChuDe);
@@ -478,6 +487,290 @@ namespace WebTinTuc.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi cập nhật thứ tự hiển thị chủ đề");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật thứ tự!" });
+            }
+        }
+
+        // GET: Admin/CreateNguoiDung
+        public async Task<IActionResult> CreateNguoiDung()
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            if (userRole != "Quản trị")
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền truy cập trang này!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            await LoadChuDesForLayout();
+
+            // Lấy danh sách quyền hạn
+            var quyenHans = await _context.QuyenHans.ToListAsync();
+            ViewBag.QuyenHans = quyenHans;
+
+            return View();
+        }
+
+        // POST: Admin/CreateNguoiDung
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateNguoiDung(string hoTen, string email, string password, string confirmPassword, string soDienThoai, string urlAnhDaiDien, int idquyenHan)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            if (userRole != "Quản trị")
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền thực hiện hành động này!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    // Validation
+                    if (string.IsNullOrEmpty(hoTen) || hoTen.Trim().Length < 2)
+                    {
+                        TempData["ErrorMessage"] = "Họ tên phải có ít nhất 2 ký tự!";
+                        return RedirectToAction("CreateNguoiDung");
+                    }
+
+                    if (string.IsNullOrEmpty(email) || !IsValidEmail(email))
+                    {
+                        TempData["ErrorMessage"] = "Vui lòng nhập email hợp lệ!";
+                        return RedirectToAction("CreateNguoiDung");
+                    }
+
+                    if (string.IsNullOrEmpty(password) || password.Length < 6)
+                    {
+                        TempData["ErrorMessage"] = "Mật khẩu phải có ít nhất 6 ký tự!";
+                        return RedirectToAction("CreateNguoiDung");
+                    }
+
+                    if (password != confirmPassword)
+                    {
+                        TempData["ErrorMessage"] = "Mật khẩu xác nhận không khớp!";
+                        return RedirectToAction("CreateNguoiDung");
+                    }
+
+                    // Kiểm tra email đã tồn tại chưa
+                    var existingEmail = await _context.NguoiDungs
+                        .FirstOrDefaultAsync(u => u.Email == email);
+                    if (existingEmail != null)
+                    {
+                        TempData["ErrorMessage"] = "Email này đã được sử dụng!";
+                        return RedirectToAction("CreateNguoiDung");
+                    }
+
+                    // Kiểm tra số điện thoại đã tồn tại chưa (nếu có)
+                    if (!string.IsNullOrEmpty(soDienThoai))
+                    {
+                        var existingPhone = await _context.NguoiDungs
+                            .FirstOrDefaultAsync(u => u.SoDienThoai == soDienThoai);
+                        if (existingPhone != null)
+                        {
+                            TempData["ErrorMessage"] = "Số điện thoại này đã được sử dụng!";
+                            return RedirectToAction("CreateNguoiDung");
+                        }
+                    }
+
+                    // Tạo user mới
+                    var newUser = new NguoiDung
+                    {
+                        HoTen = hoTen.Trim(),
+                        Email = email.Trim(),
+                        MatKhauHash = HashPassword(password),
+                        SoDienThoai = string.IsNullOrEmpty(soDienThoai) ? null : soDienThoai.Trim(),
+                        UrlanhDaiDien = string.IsNullOrEmpty(urlAnhDaiDien) ? null : urlAnhDaiDien.Trim(),
+                        IdquyenHan = idquyenHan,
+                        NgayDangKy = DateTime.Now,
+                        DaKichHoat = true
+                    };
+
+                    _context.NguoiDungs.Add(newUser);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Tạo người dùng thành công!";
+                    return RedirectToAction("NguoiDung");
+                }
+
+                // Lấy danh sách quyền hạn cho view
+                var quyenHans = await _context.QuyenHans.ToListAsync();
+                ViewBag.QuyenHans = quyenHans;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tạo người dùng mới");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo người dùng!";
+                return RedirectToAction("CreateNguoiDung");
+            }
+        }
+
+        // GET: Admin/EditNguoiDung
+        public async Task<IActionResult> EditNguoiDung(int id)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            if (userRole != "Quản trị")
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền truy cập trang này!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            await LoadChuDesForLayout();
+
+            var nguoiDung = await _context.NguoiDungs
+                .Include(u => u.IdquyenHanNavigation)
+                .FirstOrDefaultAsync(u => u.IdnguoiDung == id);
+
+            if (nguoiDung == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy người dùng!";
+                return RedirectToAction("NguoiDung");
+            }
+
+            // Lấy danh sách quyền hạn
+            var quyenHans = await _context.QuyenHans.ToListAsync();
+            ViewBag.QuyenHans = quyenHans;
+
+            return View(nguoiDung);
+        }
+
+        // POST: Admin/EditNguoiDung
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditNguoiDung(int id, string hoTen, string email, string soDienThoai, string urlAnhDaiDien, int idquyenHan, bool daKichHoat)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            if (userRole != "Quản trị")
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền thực hiện hành động này!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            try
+            {
+                var nguoiDung = await _context.NguoiDungs
+                    .FirstOrDefaultAsync(u => u.IdnguoiDung == id);
+
+                if (nguoiDung == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy người dùng!";
+                    return RedirectToAction("NguoiDung");
+                }
+
+                // Validation
+                if (string.IsNullOrEmpty(hoTen) || hoTen.Trim().Length < 2)
+                {
+                    TempData["ErrorMessage"] = "Họ tên phải có ít nhất 2 ký tự!";
+                    return RedirectToAction("EditNguoiDung", new { id });
+                }
+
+                if (string.IsNullOrEmpty(email) || !IsValidEmail(email))
+                {
+                    TempData["ErrorMessage"] = "Vui lòng nhập email hợp lệ!";
+                    return RedirectToAction("EditNguoiDung", new { id });
+                }
+
+                // Kiểm tra email đã tồn tại chưa (trừ chính user này)
+                var existingEmail = await _context.NguoiDungs
+                    .FirstOrDefaultAsync(u => u.Email == email && u.IdnguoiDung != id);
+                if (existingEmail != null)
+                {
+                    TempData["ErrorMessage"] = "Email này đã được sử dụng!";
+                    return RedirectToAction("EditNguoiDung", new { id });
+                }
+
+                // Kiểm tra số điện thoại đã tồn tại chưa (nếu có)
+                if (!string.IsNullOrEmpty(soDienThoai))
+                {
+                    var existingPhone = await _context.NguoiDungs
+                        .FirstOrDefaultAsync(u => u.SoDienThoai == soDienThoai && u.IdnguoiDung != id);
+                    if (existingPhone != null)
+                    {
+                        TempData["ErrorMessage"] = "Số điện thoại này đã được sử dụng!";
+                        return RedirectToAction("EditNguoiDung", new { id });
+                    }
+                }
+
+                // Cập nhật thông tin
+                nguoiDung.HoTen = hoTen.Trim();
+                nguoiDung.Email = email.Trim();
+                nguoiDung.SoDienThoai = string.IsNullOrEmpty(soDienThoai) ? null : soDienThoai.Trim();
+                nguoiDung.UrlanhDaiDien = string.IsNullOrEmpty(urlAnhDaiDien) ? null : urlAnhDaiDien.Trim();
+                nguoiDung.IdquyenHan = idquyenHan;
+                nguoiDung.DaKichHoat = daKichHoat;
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Cập nhật thông tin người dùng thành công!";
+                return RedirectToAction("NguoiDung");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi cập nhật người dùng {Id}", id);
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật thông tin!";
+                return RedirectToAction("EditNguoiDung", new { id });
+            }
+        }
+
+        // Helper method để validate email
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // POST: Admin/ToggleChuDeStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleChuDeStatus(int id)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            if (userRole != "Quản trị")
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thực hiện hành động này!" });
+            }
+
+            try
+            {
+                var chuDe = await _context.ChuDes.FindAsync(id);
+                if (chuDe == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy chủ đề!" });
+                }
+
+                // Toggle trạng thái kích hoạt
+                chuDe.DaKichHoat = !chuDe.DaKichHoat;
+                await _context.SaveChangesAsync();
+
+                var message = chuDe.DaKichHoat == true ? 
+                    $"Đã kích hoạt chủ đề '{chuDe.TenChuDe}'" : 
+                    $"Đã tắt kích hoạt chủ đề '{chuDe.TenChuDe}'";
+
+                _logger.LogInformation("Admin đã {Action} chủ đề: {TenChuDe}", 
+                    chuDe.DaKichHoat == true ? "kích hoạt" : "tắt kích hoạt", chuDe.TenChuDe);
+
+                return Json(new { success = true, message = message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi toggle trạng thái chủ đề {Id}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái!" });
+            }
+        }
+
+        // Helper method để hash password
+        private string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashedBytes);
             }
         }
     }

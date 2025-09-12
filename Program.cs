@@ -40,16 +40,33 @@ app.UseSession();
 
 app.UseAuthorization();
 
+// Route cụ thể cho các action của BaiViet
+app.MapControllerRoute(
+    name: "baiviet-manage",
+    pattern: "BaiViet/Manage",
+    defaults: new { controller = "BaiViet", action = "Manage" });
+
+app.MapControllerRoute(
+    name: "baiviet-create",
+    pattern: "BaiViet/Create",
+    defaults: new { controller = "BaiViet", action = "Create" });
+
+app.MapControllerRoute(
+    name: "baiviet-edit",
+    pattern: "BaiViet/Edit/{id}",
+    defaults: new { controller = "BaiViet", action = "Edit" });
+
+// Route cho slug bài viết
 app.MapControllerRoute(
     name: "baiviet",
-    pattern: "BaiViet/{slug?}",
+    pattern: "BaiViet/{slug}",
     defaults: new { controller = "BaiViet", action = "Details" });
 
+// Route cụ thể cho các action của ChuDe
 app.MapControllerRoute(
     name: "chude",
     pattern: "ChuDe/{slug?}",
     defaults: new { controller = "ChuDe", action = "Index" });
-    
 
 app.MapControllerRoute(
     name: "default",

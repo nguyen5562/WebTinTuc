@@ -185,6 +185,40 @@ namespace WebTinTuc.Controllers
                 return RedirectToAction("Login");
             }
 
+            // Tính thống kê bài viết theo trạng thái
+            var publishedArticlesCount = await _context.BaiViets
+                .Include(b => b.IdtrangThaiNavigation)
+                .CountAsync(b => b.IdtacGia.ToString() == userId && 
+                                b.IdtrangThaiNavigation.TenTrangThai == "Đã xuất bản");
+
+            var draftArticlesCount = await _context.BaiViets
+                .Include(b => b.IdtrangThaiNavigation)
+                .CountAsync(b => b.IdtacGia.ToString() == userId && 
+                                b.IdtrangThaiNavigation.TenTrangThai == "Bản nháp");
+
+            var pendingArticlesCount = await _context.BaiViets
+                .Include(b => b.IdtrangThaiNavigation)
+                .CountAsync(b => b.IdtacGia.ToString() == userId && 
+                                b.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt");
+
+            // Tính thống kê bình luận đã duyệt
+            var approvedCommentsCount = await _context.BinhLuans
+                .CountAsync(c => c.IdnguoiDung.ToString() == userId && c.DaDuyet == true);
+
+            // Lấy 6 bài viết gần đây nhất
+            var recentArticles = await _context.BaiViets
+                .Include(b => b.IdtrangThaiNavigation)
+                .Where(b => b.IdtacGia.ToString() == userId)
+                .OrderByDescending(b => b.NgayTao)
+                .Take(6)
+                .ToListAsync();
+
+            ViewBag.PublishedArticlesCount = publishedArticlesCount;
+            ViewBag.DraftArticlesCount = draftArticlesCount;
+            ViewBag.PendingArticlesCount = pendingArticlesCount;
+            ViewBag.ApprovedCommentsCount = approvedCommentsCount;
+            ViewBag.RecentArticles = recentArticles;
+
             return View(user);
         }
 

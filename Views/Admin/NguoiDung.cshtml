@@ -12,6 +12,9 @@
                 <h1 class="h3 mb-0 text-gray-800">
                     <i class="fas fa-users me-2"></i>Quản lý người dùng
                 </h1>
+                <a asp-controller="Admin" asp-action="CreateNguoiDung" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Thêm người dùng mới
+                </a>
             </div>
 
 
@@ -83,26 +86,43 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-sm @(nguoiDung.DaKichHoat == true ? "btn-outline-danger" : "btn-outline-success") toggle-user-status-btn" 
-                                                            data-id="@nguoiDung.IdnguoiDung" data-status="@nguoiDung.DaKichHoat.ToString().ToLower()">
-                                                        <i class="fas @(nguoiDung.DaKichHoat == true ? "fa-lock" : "fa-unlock")"></i>
-                                                    </button>
-                                                    <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
-                                                            <i class="fas fa-cog"></i>
+                                                    @{
+                                                        var currentUserId = Context.Session.GetString("UserId");
+                                                        var isCurrentUser = nguoiDung.IdnguoiDung.ToString() == currentUserId;
+                                                    }
+                                                    
+                                                    @if (!isCurrentUser)
+                                                    {
+                                                        <button type="button" class="btn btn-sm @(nguoiDung.DaKichHoat == true ? "btn-outline-danger" : "btn-outline-success") toggle-user-status-btn" 
+                                                                data-id="@nguoiDung.IdnguoiDung" data-status="@nguoiDung.DaKichHoat.ToString().ToLower()">
+                                                            <i class="fas @(nguoiDung.DaKichHoat == true ? "fa-lock" : "fa-unlock")"></i>
                                                         </button>
-                                                        <ul class="dropdown-menu">
-                                                            <li><a class="dropdown-item change-role-btn" href="#" data-id="@nguoiDung.IdnguoiDung" data-role="1">
-                                                                <i class="fas fa-user me-2"></i>Người dùng
-                                                            </a></li>
-                                                            <li><a class="dropdown-item change-role-btn" href="#" data-id="@nguoiDung.IdnguoiDung" data-role="2">
-                                                                <i class="fas fa-pen me-2"></i>Tác giả
-                                                            </a></li>
-                                                            <li><a class="dropdown-item change-role-btn" href="#" data-id="@nguoiDung.IdnguoiDung" data-role="3">
-                                                                <i class="fas fa-crown me-2"></i>Quản trị
-                                                            </a></li>
-                                                        </ul>
-                                                    </div>
+                                                        
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                                                <i class="fas fa-cog"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a class="dropdown-item change-role-btn" href="#" data-id="@nguoiDung.IdnguoiDung" data-role="1">
+                                                                    <i class="fas fa-user me-2"></i>Người dùng
+                                                                </a></li>
+                                                                <li><a class="dropdown-item change-role-btn" href="#" data-id="@nguoiDung.IdnguoiDung" data-role="2">
+                                                                    <i class="fas fa-pen me-2"></i>Tác giả
+                                                                </a></li>
+                                                                <li><a class="dropdown-item change-role-btn" href="#" data-id="@nguoiDung.IdnguoiDung" data-role="3">
+                                                                    <i class="fas fa-crown me-2"></i>Quản trị
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-info">Tài khoản hiện tại</span>
+                                                    }
+                                                    
+                                                    <a asp-controller="Admin" asp-action="EditNguoiDung" asp-route-id="@nguoiDung.IdnguoiDung" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>

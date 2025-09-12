@@ -9,7 +9,7 @@ public partial class ChuDe
 
     public string TenChuDe { get; set; } = null!;
 
-    public string Slug { get; set; } = null!;
+    public string? Slug { get; set; } = null!;
 
     public int? ThuTuHienThi { get; set; }
 

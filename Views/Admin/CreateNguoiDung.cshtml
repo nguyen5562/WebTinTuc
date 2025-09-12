@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "Tạo người dùng mới";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-user-plus me-2"></i>Tạo người dùng mới
+                </h1>
+                <a asp-controller="Admin" asp-action="NguoiDung" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin người dùng</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateNguoiDung" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="hoTen" required maxlength="100" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" name="email" required maxlength="100" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" name="password" required minlength="6" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" name="confirmPassword" required minlength="6" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="tel" class="form-control" name="soDienThoai" maxlength="20" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">URL ảnh đại diện</label>
+                                    <input type="url" class="form-control" name="urlAnhDaiDien" maxlength="500" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Quyền hạn <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="idquyenHan" required>
+                                        @if (ViewBag.QuyenHans != null)
+                                        {
+                                            @foreach (var quyenHan in (List<WebTinTuc.Models.QuyenHan>)ViewBag.QuyenHans)
+                                            {
+                                                <option value="@quyenHan.IdquyenHan">@quyenHan.TenQuyenHan</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-save me-1"></i>Tạo người dùng
+                            </button>
+                            <a asp-controller="Admin" asp-action="NguoiDung" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Validation mật khẩu xác nhận
+        document.querySelector('input[name="confirmPassword"]').addEventListener('input', function() {
+            const password = document.querySelector('input[name="password"]').value;
+            const confirmPassword = this.value;
+            
+            if (password !== confirmPassword) {
+                this.setCustomValidity('Mật khẩu xác nhận không khớp!');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+        
+        document.querySelector('input[name="password"]').addEventListener('input', function() {
+            const confirmPassword = document.querySelector('input[name="confirmPassword"]');
+            if (confirmPassword.value) {
+                confirmPassword.dispatchEvent(new Event('input'));
+            }
+        });
+    </script>
+}

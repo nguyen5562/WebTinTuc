@@ -116,25 +116,77 @@
                     <hr class="my-4">
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="card bg-light">
                                 <div class="card-body text-center">
                                     <i class="fas fa-newspaper fa-2x text-primary mb-2"></i>
-                                    <h5 class="card-title">Bài viết đã đăng</h5>
-                                    <p class="card-text fs-4 text-primary">0</p>
+                                    <h6 class="card-title">Bài viết đã xuất bản</h6>
+                                    <p class="card-text fs-4 text-primary fw-bold">@ViewBag.PublishedArticlesCount</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="card bg-light">
                                 <div class="card-body text-center">
                                     <i class="fas fa-comments fa-2x text-success mb-2"></i>
-                                    <h5 class="card-title">Bình luận đã viết</h5>
-                                    <p class="card-text fs-4 text-success">0</p>
+                                    <h6 class="card-title">Bình luận đã duyệt</h6>
+                                    <p class="card-text fs-4 text-success fw-bold">@ViewBag.ApprovedCommentsCount</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-edit fa-2x text-warning mb-2"></i>
+                                    <h6 class="card-title">Bài viết bản nháp</h6>
+                                    <p class="card-text fs-4 text-warning fw-bold">@ViewBag.DraftArticlesCount</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                                    <h6 class="card-title">Bài viết chờ duyệt</h6>
+                                    <p class="card-text fs-4 text-info fw-bold">@ViewBag.PendingArticlesCount</p>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Bài viết gần đây -->
+                    @if (ViewBag.RecentArticles != null && ((List<WebTinTuc.Models.BaiViet>)ViewBag.RecentArticles).Any())
+                    {
+                        <hr class="my-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-history me-2"></i>Bài viết gần đây
+                        </h5>
+                        <div class="row">
+                            @foreach (var article in (List<WebTinTuc.Models.BaiViet>)ViewBag.RecentArticles)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <a href="/BaiViet/@article.Slug" class="text-decoration-none">
+                                                    @article.TieuDe
+                                                </a>
+                                            </h6>
+                                            <p class="card-text text-muted small">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                @article.NgayTao.Value.ToString("dd/MM/yyyy HH:mm")
+                                                <span class="badge bg-@(article.IdtrangThaiNavigation.TenTrangThai == "Đã xuất bản" ? "success" : 
+                                                                    article.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt" ? "warning" : 
+                                                                    article.IdtrangThaiNavigation.TenTrangThai == "Bản nháp" ? "secondary" : "danger") ms-2">
+                                                    @article.IdtrangThaiNavigation.TenTrangThai
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
                     
                     <div class="text-center mt-4">
                         <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">

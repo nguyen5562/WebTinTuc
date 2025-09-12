@@ -35,16 +35,6 @@
                                     <span asp-validation-for="Slug" class="text-danger"></span>
                                     <div class="form-text">Slug dùng cho URL, ví dụ: "tin-tuc", "the-thao".</div>
                                 </div>
-                                <div class="mb-3">
-                                    <div class="form-check form-switch">
-                                        <input name="DaKichHoat" class="form-check-input" type="checkbox" value="true" @(Model.DaKichHoat == true ? "checked" : "") />
-                                        <input type="hidden" name="DaKichHoat" value="false" />
-                                        <label class="form-check-label">
-                                            Kích hoạt chủ đề
-                                        </label>
-                                    </div>
-                                    <div class="form-text">Chủ đề được kích hoạt sẽ hiển thị trên website. Thứ tự hiển thị có thể sắp xếp bằng cách kéo thả trong danh sách.</div>
-                                </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="card bg-light">
