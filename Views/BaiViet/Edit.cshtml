@@ -347,9 +347,9 @@
                     lastSavedContent = document.getElementById('tieuDe').value.trim() + '|' + tinymce.get('noiDung').getContent().trim();
                     // Xóa draft khỏi localStorage
                     localStorage.removeItem('articleDraft_' + @Model.IdbaiViet);
-                    // Chuyển đến trang chi tiết bài viết
+                    // Chuyển đến trang quản lý bài viết
                     setTimeout(() => {
-                        window.location.href = '@Url.Action("Details", "BaiViet", new { id = Model.IdbaiViet })';
+                        window.location.href = '@Url.Action("Manage", "BaiViet")';
                     }, 1500);
                 } else {
                     showNotification(data.message, 'error');

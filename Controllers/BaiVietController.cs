@@ -147,6 +147,7 @@ namespace WebTinTuc.Controllers
 
                 var binhLuan = await _context.BinhLuans
                     .Include(b => b.IdbaiVietNavigation)
+                    .Include(b => b.InverseIdbinhLuanChaNavigation) // Include bình luận con
                     .FirstOrDefaultAsync(b => b.IdbinhLuan == binhLuanId);
 
                 if (binhLuan == null)
@@ -154,11 +155,38 @@ namespace WebTinTuc.Controllers
                     return Json(new { success = false, message = "Bình luận không tồn tại!" });
                 }
 
+                // Kiểm tra nếu đang cố duyệt bình luận con mà bình luận cha bị ẩn
+                if (binhLuan.IdbinhLuanCha != null)
+                {
+                    var binhLuanCha = await _context.BinhLuans
+                        .FirstOrDefaultAsync(b => b.IdbinhLuan == binhLuan.IdbinhLuanCha);
+                    
+                    if (binhLuanCha != null && !binhLuanCha.DaDuyet && !binhLuan.DaDuyet)
+                    {
+                        return Json(new { success = false, message = "Không thể duyệt bình luận con khi bình luận cha đang bị ẩn!" });
+                    }
+                }
+
                 // Toggle trạng thái duyệt
                 binhLuan.DaDuyet = !binhLuan.DaDuyet;
+
+                // Nếu ẩn bình luận cha, ẩn tất cả bình luận con
+                if (!binhLuan.DaDuyet && binhLuan.IdbinhLuanCha == null)
+                {
+                    foreach (var binhLuanCon in binhLuan.InverseIdbinhLuanChaNavigation)
+                    {
+                        binhLuanCon.DaDuyet = false;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
                 var message = binhLuan.DaDuyet ? "Đã duyệt bình luận" : "Đã ẩn bình luận";
+                if (!binhLuan.DaDuyet && binhLuan.IdbinhLuanCha == null && binhLuan.InverseIdbinhLuanChaNavigation.Any())
+                {
+                    message += " và tất cả bình luận con";
+                }
+                
                 return Json(new { success = true, message = message, isApproved = binhLuan.DaDuyet });
             }
             catch (Exception ex)

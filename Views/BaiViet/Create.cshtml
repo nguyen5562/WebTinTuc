@@ -319,9 +319,9 @@
                     isSaved = true;
                     lastSavedContent = document.getElementById('tieuDe').value.trim() + '|' + tinymce.get('noiDung').getContent().trim();
                     clearDraft(); // Clear draft khi thành công
-                    // Chuyển đến trang chi tiết bài viết
+                    // Chuyển đến trang chủ
                     setTimeout(() => {
-                        window.location.href = '@Url.Action("Details", "BaiViet")/' + data.baiVietId;
+                        window.location.href = '@Url.Action("Index", "Home")';
                     }, 1500);
                 } else {
                     showNotification(data.message, 'error');
