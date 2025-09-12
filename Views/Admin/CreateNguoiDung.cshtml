@@ -33,11 +33,21 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control" name="password" required minlength="6" />
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" name="password" id="password" required minlength="6" />
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control" name="confirmPassword" required minlength="6" />
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" required minlength="6" />
+                                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -83,6 +93,31 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
+        // Password Toggle Handlers
+        function setupPasswordToggle(buttonId, inputId) {
+            const button = document.getElementById(buttonId);
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+            
+            if (button && input) {
+                button.addEventListener('click', function() {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            }
+        }
+        
+        // Setup password toggles
+        setupPasswordToggle('togglePassword', 'password');
+        setupPasswordToggle('toggleConfirmPassword', 'confirmPassword');
+        
         // Validation mật khẩu xác nhận
         document.querySelector('input[name="confirmPassword"]').addEventListener('input', function() {
             const password = document.querySelector('input[name="password"]').value;

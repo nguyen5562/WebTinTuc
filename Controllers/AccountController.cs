@@ -279,6 +279,64 @@ namespace WebTinTuc.Controllers
             }
         }
 
+        // POST: Account/ChangePassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        {
+            try
+            {
+                // Kiểm tra đăng nhập
+                var userId = HttpContext.Session.GetInt32("UserId");
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện chức năng này!" });
+                }
+
+                // Validation
+                if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
+                {
+                    return Json(new { success = false, message = "Vui lòng điền đầy đủ thông tin!" });
+                }
+
+                if (newPassword.Length < 6)
+                {
+                    return Json(new { success = false, message = "Mật khẩu mới phải có ít nhất 6 ký tự!" });
+                }
+
+                if (newPassword != confirmPassword)
+                {
+                    return Json(new { success = false, message = "Mật khẩu mới và xác nhận mật khẩu không khớp!" });
+                }
+
+                // Lấy thông tin user
+                var user = await _context.NguoiDungs.FindAsync(userId);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy thông tin người dùng!" });
+                }
+
+                // Kiểm tra mật khẩu hiện tại
+                var currentPasswordHash = HashPassword(currentPassword);
+                if (user.MatKhauHash != currentPasswordHash)
+                {
+                    return Json(new { success = false, message = "Mật khẩu hiện tại không đúng!" });
+                }
+
+                // Cập nhật mật khẩu mới
+                user.MatKhauHash = HashPassword(newPassword);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("User {UserId} đã đổi mật khẩu thành công", userId);
+                return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi đổi mật khẩu cho user {UserId}", HttpContext.Session.GetInt32("UserId"));
+                return Json(new { success = false, message = "Có lỗi xảy ra khi đổi mật khẩu!" });
+            }
+        }
+
         // Helper method để hash password
         private string HashPassword(string password)
         {
