@@ -319,6 +319,24 @@
             });
         });
 
+        // Xử lý khi modal được mở
+        document.getElementById('editProfileModal').addEventListener('show.bs.modal', function() {
+            // Ẩn tất cả validation errors
+            const invalidFeedbacks = document.querySelectorAll('#editProfileModal .invalid-feedback');
+            invalidFeedbacks.forEach(feedback => {
+                feedback.style.display = 'none';
+            });
+            
+            // Xóa class is-invalid khỏi tất cả inputs
+            const inputs = document.querySelectorAll('#editProfileModal .form-control');
+            inputs.forEach(input => {
+                input.classList.remove('is-invalid');
+            });
+            
+            // Reset flag
+            hasUserInteracted = false;
+        });
+
         // Xử lý khi modal được đóng
         document.getElementById('editProfileModal').addEventListener('hidden.bs.modal', function() {
             // Reset form về trạng thái ban đầu
@@ -373,7 +391,7 @@
         }
         
         .invalid-feedback {
-            display: none;
+            display: none !important;
             width: 100%;
             margin-top: 0.25rem;
             font-size: 0.875em;
@@ -381,7 +399,7 @@
         }
         
         .is-invalid + .invalid-feedback {
-            display: block;
+            display: block !important;
         }
         
         .profile-info-item {
