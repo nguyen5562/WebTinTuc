@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Xác nhận Email";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-envelope-open-text me-2"></i>Xác nhận Email
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="bg-success text-white p-3 rounded mb-3">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="bg-danger text-white p-3 rounded mb-3">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="text-center mb-4">
+                    <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                    <h5 class="text-primary">Email xác nhận đã được gửi!</h5>
+                    <p class="text-muted">
+                        Chúng tôi đã gửi một email xác nhận đến địa chỉ email của bạn. 
+                        Vui lòng kiểm tra hộp thư (bao gồm cả thư mục Spam) và nhấn vào link xác nhận trong email.
+                    </p>
+                </div>
+
+                <div class="bg-info text-white p-3 rounded mb-4">
+                    <h6 class="text-white mb-2">
+                        <i class="fas fa-info-circle me-1"></i>Quy định tác giả
+                    </h6>
+                    <hr class="text-white">
+                    <small>
+                        • Tuân thủ quy định viết bài và chịu trách nhiệm về nội dung bài viết<br>
+                        • Không đăng nội dung vi phạm pháp luật hoặc không phù hợp<br>
+                        • Tôn trọng quyền tác giả và bản quyền<br>
+                        • Chịu trách nhiệm về tính chính xác của thông tin
+                    </small>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-clock me-1"></i>
+                        Link xác nhận sẽ hết hạn sau 24 giờ.
+                    </p>
+                    <a asp-action="Login" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-1"></i>Quay lại đăng nhập
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

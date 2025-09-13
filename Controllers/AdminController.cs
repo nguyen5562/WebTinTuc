@@ -636,7 +636,7 @@ namespace WebTinTuc.Controllers
         // POST: Admin/EditNguoiDung
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditNguoiDung(int id, string hoTen, string email, string soDienThoai, string urlAnhDaiDien, int idquyenHan, bool daKichHoat)
+        public async Task<IActionResult> EditNguoiDung(int id, string hoTen, string soDienThoai, string urlAnhDaiDien, int idquyenHan, bool daKichHoat)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             if (userRole != "Quản trị")
@@ -663,20 +663,6 @@ namespace WebTinTuc.Controllers
                     return RedirectToAction("EditNguoiDung", new { id });
                 }
 
-                if (string.IsNullOrEmpty(email) || !IsValidEmail(email))
-                {
-                    TempData["ErrorMessage"] = "Vui lòng nhập email hợp lệ!";
-                    return RedirectToAction("EditNguoiDung", new { id });
-                }
-
-                // Kiểm tra email đã tồn tại chưa (trừ chính user này)
-                var existingEmail = await _context.NguoiDungs
-                    .FirstOrDefaultAsync(u => u.Email == email && u.IdnguoiDung != id);
-                if (existingEmail != null)
-                {
-                    TempData["ErrorMessage"] = "Email này đã được sử dụng!";
-                    return RedirectToAction("EditNguoiDung", new { id });
-                }
 
                 // Kiểm tra số điện thoại đã tồn tại chưa (nếu có)
                 if (!string.IsNullOrEmpty(soDienThoai))
@@ -690,9 +676,8 @@ namespace WebTinTuc.Controllers
                     }
                 }
 
-                // Cập nhật thông tin
+                // Cập nhật thông tin (không thay đổi email)
                 nguoiDung.HoTen = hoTen.Trim();
-                nguoiDung.Email = email.Trim();
                 nguoiDung.SoDienThoai = string.IsNullOrEmpty(soDienThoai) ? null : soDienThoai.Trim();
                 nguoiDung.UrlanhDaiDien = string.IsNullOrEmpty(urlAnhDaiDien) ? null : urlAnhDaiDien.Trim();
                 nguoiDung.IdquyenHan = idquyenHan;

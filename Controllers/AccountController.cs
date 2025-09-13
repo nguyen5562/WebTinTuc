@@ -3,16 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 using WebTinTuc.Models;
+using WebTinTuc.Services;
 
 namespace WebTinTuc.Controllers
 {
     public class AccountController : BaseController
     {
         private readonly ILogger<AccountController> _logger;
+        private readonly EmailService _emailService;
 
-        public AccountController(WebTinTucContext context, ILogger<AccountController> logger) : base(context)
+        public AccountController(WebTinTucContext context, ILogger<AccountController> logger, EmailService emailService) : base(context)
         {
             _logger = logger;
+            _emailService = emailService;
         }
 
         // GET: Account/Login
@@ -45,11 +48,18 @@ namespace WebTinTuc.Controllers
                 // Tìm user trong database
                 var user = await _context.NguoiDungs
                     .Include(u => u.IdquyenHanNavigation)
-                    .FirstOrDefaultAsync(u => u.Email == email && u.MatKhauHash == hashedPassword && u.DaKichHoat == true);
+                    .FirstOrDefaultAsync(u => u.Email == email && u.MatKhauHash == hashedPassword);
 
                 if (user == null)
                 {
                     TempData["ErrorMessage"] = "Email hoặc mật khẩu không đúng!";
+                    return View();
+                }
+
+                // Kiểm tra tài khoản đã được kích hoạt chưa
+                if (user.DaKichHoat != true)
+                {
+                    TempData["ErrorMessage"] = "Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để xác nhận tài khoản.";
                     return View();
                 }
 
@@ -130,6 +140,9 @@ namespace WebTinTuc.Controllers
                     }
                 }
 
+                // Xác định trạng thái kích hoạt dựa trên quyền hạn
+                bool isActivated = quyenHan == 1; // Chỉ độc giả được kích hoạt ngay
+                
                 // Tạo user mới
                 var newUser = new NguoiDung
                 {
@@ -138,21 +151,98 @@ namespace WebTinTuc.Controllers
                     SoDienThoai = soDienThoai,
                     MatKhauHash = HashPassword(password),
                     NgayDangKy = DateTime.Now,
-                    DaKichHoat = true, // Tạm thời kích hoạt luôn, sau này có thể thêm email verification
+                    DaKichHoat = isActivated,
                     IdquyenHan = quyenHan // 1 = Người đọc, 2 = Tác giả, 3 = Quản trị
                 };
 
                 _context.NguoiDungs.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.";
-                return RedirectToAction("Login");
+                if (quyenHan == 2) // Tác giả
+                {
+                    // Tạo token xác nhận email (sử dụng ID + timestamp)
+                    var confirmationToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{newUser.IdnguoiDung}_{DateTime.Now.Ticks}"));
+                    
+                    // Lưu token vào session để xác nhận (trong thực tế nên lưu vào DB)
+                    HttpContext.Session.SetString($"EmailConfirmation_{newUser.IdnguoiDung}", confirmationToken);
+                    
+                    // Gửi email xác nhận
+                    var emailSent = await _emailService.SendEmailConfirmationAsync(
+                        newUser.Email, 
+                        newUser.HoTen, 
+                        confirmationToken, 
+                        newUser.IdnguoiDung
+                    );
+                    
+                    if (emailSent)
+                    {
+                        TempData["SuccessMessage"] = "Đăng ký tác giả thành công! Vui lòng kiểm tra email để xác nhận tài khoản.";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Đăng ký thành công nhưng không thể gửi email xác nhận. Vui lòng liên hệ quản trị viên.";
+                    }
+                    
+                    return RedirectToAction("EmailConfirmation");
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.";
+                    return RedirectToAction("Login");
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi đăng ký");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra, vui lòng thử lại!";
                 return View();
+            }
+        }
+
+        // GET: Account/EmailConfirmation
+        public async Task<IActionResult> EmailConfirmation()
+        {
+            await LoadChuDesForLayout();
+            return View();
+        }
+
+        // GET: Account/ConfirmEmail
+        public async Task<IActionResult> ConfirmEmail(int userId, string token)
+        {
+            try
+            {
+                // Kiểm tra token trong session
+                var sessionToken = HttpContext.Session.GetString($"EmailConfirmation_{userId}");
+                
+                if (string.IsNullOrEmpty(sessionToken) || sessionToken != token)
+                {
+                    TempData["ErrorMessage"] = "Token xác nhận không hợp lệ hoặc đã hết hạn!";
+                    return RedirectToAction("EmailConfirmation");
+                }
+
+                // Tìm user và kích hoạt tài khoản
+                var user = await _context.NguoiDungs.FindAsync(userId);
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy tài khoản!";
+                    return RedirectToAction("EmailConfirmation");
+                }
+
+                // Kích hoạt tài khoản
+                user.DaKichHoat = true;
+                await _context.SaveChangesAsync();
+
+                // Xóa token khỏi session
+                HttpContext.Session.Remove($"EmailConfirmation_{userId}");
+
+                TempData["SuccessMessage"] = "Xác nhận email thành công! Tài khoản tác giả của bạn đã được kích hoạt. Bạn có thể đăng nhập ngay bây giờ.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xác nhận email cho user {UserId}", userId);
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xác nhận email!";
+                return RedirectToAction("EmailConfirmation");
             }
         }
 

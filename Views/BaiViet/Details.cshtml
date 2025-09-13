@@ -49,6 +49,36 @@
                     }
                 </div>
 
+                <!-- Thông báo trạng thái bài viết -->
+                @if (Model.IdtrangThaiNavigation.TenTrangThai != "Đã xuất bản")
+                {
+                    <div class="bg-warning text-dark p-3 rounded mb-4">
+                        <h6 class="text-dark mb-2">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Trạng thái bài viết
+                        </h6>
+                        <hr class="text-dark">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-@(Model.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt" ? "warning" : "secondary") me-2">
+                                @Model.IdtrangThaiNavigation.TenTrangThai
+                            </span>
+                            <span class="text-muted">
+                                @if (Model.IdtrangThaiNavigation.TenTrangThai == "Bản nháp")
+                                {
+                                    <i class="fas fa-edit me-1"></i>@("Bài viết này đang ở dạng bản nháp và chưa được xuất bản.")
+                                }
+                                else if (Model.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt")
+                                {
+                                    <i class="fas fa-clock me-1"></i>@("Bài viết này đang chờ quản trị viên duyệt.")
+                                }
+                                else if (Model.IdtrangThaiNavigation.TenTrangThai == "Bị từ chối")
+                                {
+                                    <i class="fas fa-times-circle me-1"></i>@("Bài viết này đã bị từ chối và không được xuất bản.")
+                                }
+                            </span>
+                        </div>
+                    </div>
+                }
+
                 <!-- Action buttons -->
                 @{
                     var userRole = Context.Session.GetString("UserRole");
@@ -107,13 +137,15 @@
         </article>
 
         <!-- Phần bình luận -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-comments me-2"></i>Bình luận (@Model.BinhLuans.Count)
-                </h5>
-            </div>
-            <div class="card-body">
+        @if (Model.IdtrangThaiNavigation.TenTrangThai == "Đã xuất bản")
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>Bình luận (@Model.BinhLuans.Count)
+                    </h5>
+                </div>
+                <div class="card-body">
                 <!-- Form thêm bình luận -->
                 @if (Context.Session.GetString("UserId") != null)
                 {
@@ -289,6 +321,24 @@
                 </div>
             </div>
         </div>
+        }
+        else
+        {
+            <!-- Thông báo không thể bình luận -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comment-slash me-2"></i>Bình luận không khả dụng
+                    </h5>
+                </div>
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-lock fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">
+                        Bài viết này chưa được xuất bản nên không thể bình luận.
+                    </p>
+                </div>
+            </div>
+        }
     </div>
 
     <!-- Sidebar -->

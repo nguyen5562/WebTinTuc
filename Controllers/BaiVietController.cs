@@ -44,8 +44,13 @@ namespace WebTinTuc.Controllers
                 return NotFound();
             }
 
-            // Chỉ hiển thị bài viết đã xuất bản
-            if (baiViet.IdtrangThaiNavigation.TenTrangThai != "Đã xuất bản")
+            // Kiểm tra quyền xem bài viết
+            var userId = HttpContext.Session.GetString("UserId");
+            var isAuthor = baiViet.IdtacGia.ToString() == userId;
+            
+            // Chỉ hiển thị bài viết đã xuất bản cho người dùng thường
+            // Tác giả và admin có thể xem bài viết của mình dù chưa xuất bản
+            if (baiViet.IdtrangThaiNavigation.TenTrangThai != "Đã xuất bản" && !isAuthor && !isAdmin)
             {
                 return NotFound();
             }

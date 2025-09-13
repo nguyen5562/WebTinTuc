@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WebTinTuc.Models;
+using WebTinTuc.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<WebTinTucContext>(options =>
@@ -18,6 +19,9 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Add EmailService
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
@@ -80,6 +84,12 @@ app.MapControllerRoute(
     name: "baiviet-togglehot",
     pattern: "BaiViet/ToggleHot",
     defaults: new { controller = "BaiViet", action = "ToggleHot" });
+
+// Route cho EmailConfirmation
+app.MapControllerRoute(
+    name: "email-confirmation",
+    pattern: "Account/EmailConfirmation",
+    defaults: new { controller = "Account", action = "EmailConfirmation" });
 
 // Route cho slug bài viết
 app.MapControllerRoute(

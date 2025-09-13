@@ -31,8 +31,9 @@
                                     <input type="text" class="form-control" name="hoTen" value="@Model.HoTen" required maxlength="100" />
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" name="email" value="@Model.Email" required maxlength="100" />
+                                    <label class="form-label">Email</label>
+                                    <input type="text" class="form-control" value="@Model.Email" readonly />
+                                    <small class="form-text text-muted">Email không thể thay đổi</small>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Số điện thoại</label>
