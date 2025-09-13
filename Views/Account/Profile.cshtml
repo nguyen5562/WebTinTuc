@@ -226,9 +226,13 @@
                         <div class="form-text">Số điện thoại là tùy chọn</div>
                     </div>
                     <div class="mb-3">
-                        <label for="editAnhDaiDien" class="form-label">URL ảnh đại diện</label>
-                        <input type="url" class="form-control" id="editAnhDaiDien" name="urlAnhDaiDien" value="@Model.UrlanhDaiDien" placeholder="https://example.com/avatar.jpg">
-                        <div class="form-text">URL ảnh đại diện là tùy chọn</div>
+                        @await Html.PartialAsync("_ImageUpload", Model.UrlanhDaiDien, new ViewDataDictionary(ViewData) {
+                            { "FieldId", "editAnhDaiDien" },
+                            { "FieldName", "urlAnhDaiDien" },
+                            { "Label", "URL ảnh đại diện" },
+                            { "Placeholder", "https://example.com/avatar.jpg" },
+                            { "HelpText", "URL ảnh đại diện là tùy chọn" }
+                        })
                     </div>
                 </form>
             </div>
@@ -275,7 +279,10 @@
             // Validation
             const hoTen = document.getElementById('editHoTen').value.trim();
             if (!hoTen || hoTen.length < 2) {
-                showNotification('Họ tên phải có ít nhất 2 ký tự!', 'error');
+                if (hasUserInteracted) {
+                    showNotification('Họ tên phải có ít nhất 2 ký tự!', 'error');
+                }
+                document.getElementById('editHoTen').classList.add('is-invalid');
                 return;
             }
             
@@ -321,8 +328,12 @@
             saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>Lưu thay đổi';
         });
 
+        // Flag để track xem user đã tương tác với form chưa
+        let hasUserInteracted = false;
+        
         // Validation real-time cho form
         document.getElementById('editHoTen').addEventListener('input', function() {
+            hasUserInteracted = true;
             const value = this.value.trim();
             if (value.length < 2) {
                 this.classList.add('is-invalid');
@@ -333,6 +344,7 @@
 
         // Validation cho URL ảnh đại diện
         document.getElementById('editAnhDaiDien').addEventListener('input', function() {
+            hasUserInteracted = true;
             const value = this.value.trim();
             if (value && !isValidUrl(value)) {
                 this.classList.add('is-invalid');
@@ -358,6 +370,18 @@
             object-fit: cover;
             border: 4px solid #fff;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+        
+        .is-invalid + .invalid-feedback {
+            display: block;
         }
         
         .profile-info-item {

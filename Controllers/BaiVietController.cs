@@ -100,9 +100,9 @@ namespace WebTinTuc.Controllers
                     return Json(new { success = false, message = "Vui lòng đăng nhập để bình luận!" });
                 }
 
-                if (string.IsNullOrEmpty(noiDung) || noiDung.Trim().Length < 5)
+                if (string.IsNullOrEmpty(noiDung) || noiDung.Trim().Length == 0)
                 {
-                    return Json(new { success = false, message = "Nội dung bình luận phải có ít nhất 5 ký tự!" });
+                    return Json(new { success = false, message = "Vui lòng nhập nội dung bình luận!" });
                 }
 
                 // Kiểm tra bài viết có tồn tại không
@@ -452,12 +452,12 @@ namespace WebTinTuc.Controllers
                 var userRole = HttpContext.Session.GetString("UserRole");
                 if (userRole != "Tác giả" && userRole != "Quản trị")
                 {
-                    return Json(new { error = new { message = "Bạn không có quyền upload ảnh!" } });
+                    return Json(new { success = false, message = "Bạn không có quyền upload ảnh!" });
                 }
 
                 if (upload == null || upload.Length == 0)
                 {
-                    return Json(new { error = new { message = "Vui lòng chọn file ảnh!" } });
+                    return Json(new { success = false, message = "Vui lòng chọn file ảnh!" });
                 }
 
                 // Kiểm tra định dạng file
@@ -466,13 +466,13 @@ namespace WebTinTuc.Controllers
                 
                 if (!allowedExtensions.Contains(fileExtension))
                 {
-                    return Json(new { error = new { message = "Chỉ cho phép file ảnh (JPG, PNG, GIF, WebP)!" } });
+                    return Json(new { success = false, message = "Chỉ cho phép file ảnh (JPG, PNG, GIF, WebP)!" });
                 }
 
                 // Kiểm tra kích thước file (max 5MB)
                 if (upload.Length > 5 * 1024 * 1024)
                 {
-                    return Json(new { error = new { message = "File ảnh không được vượt quá 5MB!" } });
+                    return Json(new { success = false, message = "File ảnh không được vượt quá 5MB!" });
                 }
 
                 // Tạo tên file unique
@@ -496,12 +496,12 @@ namespace WebTinTuc.Controllers
                 // Trả về URL ảnh
                 var imageUrl = $"/uploads/images/{fileName}";
                 
-                return Json(new { url = imageUrl });
+                return Json(new { success = true, url = imageUrl });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi upload ảnh");
-                return Json(new { error = new { message = "Có lỗi xảy ra khi upload ảnh!" } });
+                return Json(new { success = false, message = "Có lỗi xảy ra khi upload ảnh!" });
             }
         }
 

@@ -56,8 +56,13 @@
                                     <input type="tel" class="form-control" name="soDienThoai" maxlength="20" />
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">URL ảnh đại diện</label>
-                                    <input type="url" class="form-control" name="urlAnhDaiDien" maxlength="500" />
+                                    @await Html.PartialAsync("_ImageUpload", "", new ViewDataDictionary(ViewData) {
+                                        { "FieldId", "urlAnhDaiDien" },
+                                        { "FieldName", "urlAnhDaiDien" },
+                                        { "Label", "URL ảnh đại diện" },
+                                        { "Placeholder", "https://example.com/avatar.jpg" },
+                                        { "HelpText", "URL ảnh đại diện là tùy chọn" }
+                                    })
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Quyền hạn <span class="text-danger">*</span></label>

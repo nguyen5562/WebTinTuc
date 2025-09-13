@@ -30,7 +30,7 @@
             </div>
 
             <!-- Form chỉnh sửa bài viết -->
-            <form id="editArticleForm" class="needs-validation" novalidate>
+            <form id="editArticleForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.IdbaiViet" />
                 
@@ -61,10 +61,13 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="urlanhBia" class="form-label">URL ảnh bìa</label>
-                                    <input type="url" class="form-control" id="urlanhBia" name="urlanhBia" 
-                                           value="@Model.UrlanhBia">
-                                    <div class="form-text">URL ảnh bìa cho bài viết (tùy chọn)</div>
+                                    @await Html.PartialAsync("_ImageUpload", Model.UrlanhBia, new ViewDataDictionary(ViewData) {
+                                        { "FieldId", "urlanhBia" },
+                                        { "FieldName", "urlanhBia" },
+                                        { "Label", "URL ảnh bìa" },
+                                        { "Placeholder", "https://example.com/image.jpg" },
+                                        { "HelpText", "URL ảnh bìa cho bài viết (tùy chọn)" }
+                                    })
                                 </div>
                             </div>
                         </div>
@@ -484,6 +487,9 @@
             modal.show();
         });
 
+        // Flag để track xem user đã tương tác với form chưa
+        let hasUserInteracted = false;
+        
         // Validation form
         function validateForm() {
             const form = document.getElementById('editArticleForm');
@@ -496,7 +502,9 @@
             // Validate tiêu đề
             if (!tieuDe || tieuDe.length < 5) {
                 document.getElementById('tieuDe').classList.add('is-invalid');
-                showNotification('Vui lòng nhập tiêu đề bài viết!', 'error');
+                if (hasUserInteracted) {
+                    showNotification('Vui lòng nhập tiêu đề bài viết!', 'error');
+                }
                 isValid = false;
             } else {
                 document.getElementById('tieuDe').classList.remove('is-invalid');
@@ -505,7 +513,9 @@
             // Validate chủ đề
             if (!idchuDe) {
                 document.getElementById('idchuDe').classList.add('is-invalid');
-                showNotification('Vui lòng chọn chủ đề!', 'error');
+                if (hasUserInteracted) {
+                    showNotification('Vui lòng chọn chủ đề!', 'error');
+                }
                 isValid = false;
             } else {
                 document.getElementById('idchuDe').classList.remove('is-invalid');
@@ -514,7 +524,9 @@
             // Validate nội dung - kiểm tra text content thực tế, không phải HTML
             const textContent = tinymce.get('noiDung').getContent({format: 'text'}).trim();
             if (!textContent || textContent.length < 50) {
-                showNotification('Nội dung phải có ít nhất 50 ký tự!', 'error');
+                if (hasUserInteracted) {
+                    showNotification('Nội dung phải có ít nhất 50 ký tự!', 'error');
+                }
                 isValid = false;
             }
             
@@ -573,14 +585,29 @@
         }
 
         // Lắng nghe thay đổi trong form
-        document.getElementById('tieuDe').addEventListener('input', updateSaveStatus);
-        document.getElementById('tomTat').addEventListener('input', updateSaveStatus);
-        document.getElementById('urlanhBia').addEventListener('input', updateSaveStatus);
-        document.getElementById('idchuDe').addEventListener('change', updateSaveStatus);
+        document.getElementById('tieuDe').addEventListener('input', function() {
+            hasUserInteracted = true;
+            updateSaveStatus();
+        });
+        document.getElementById('tomTat').addEventListener('input', function() {
+            hasUserInteracted = true;
+            updateSaveStatus();
+        });
+        document.getElementById('urlanhBia').addEventListener('input', function() {
+            hasUserInteracted = true;
+            updateSaveStatus();
+        });
+        document.getElementById('idchuDe').addEventListener('change', function() {
+            hasUserInteracted = true;
+            updateSaveStatus();
+        });
         
         // Lắng nghe thay đổi trong TinyMCE
         tinymce.on('AddEditor', function(e) {
-            e.editor.on('change', updateSaveStatus);
+            e.editor.on('change', function() {
+                hasUserInteracted = true;
+                updateSaveStatus();
+            });
         });
 
         // Cảnh báo khi rời trang mà chưa lưu
@@ -650,11 +677,15 @@
         }
         
         .invalid-feedback {
-            display: block;
+            display: none;
             width: 100%;
             margin-top: 0.25rem;
             font-size: 0.875em;
             color: #dc3545;
+        }
+        
+        .is-invalid + .invalid-feedback {
+            display: block;
         }
     </style>
 }

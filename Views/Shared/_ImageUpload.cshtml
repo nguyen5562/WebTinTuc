@@ -1,0 +1,143 @@
+@model string
+
+<div class="image-upload-container">
+    <div class="row">
+        <div class="col-md-8">
+            <label for="@ViewData["FieldId"]" class="form-label">@ViewData["Label"]</label>
+            <input type="url" class="form-control" id="@ViewData["FieldId"]" name="@ViewData["FieldName"]" 
+                   value="@Model" placeholder="@ViewData["Placeholder"]">
+            <div class="form-text">@ViewData["HelpText"]</div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-grid">
+                <button type="button" class="btn btn-outline-primary" id="uploadBtn_@ViewData["FieldId"]">
+                    <i class="fas fa-upload me-2"></i>Tải ảnh lên
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Preview container -->
+    <div class="mt-3" id="preview_@ViewData["FieldId"]" style="display: none;">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Xem trước ảnh:</h6>
+                <img id="previewImg_@ViewData["FieldId"]" src="" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-danger" id="removePreview_@ViewData["FieldId"]">
+                        <i class="fas fa-trash me-1"></i>Xóa ảnh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput_@ViewData["FieldId"]" accept="image/*" style="display: none;">
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fieldId = '@ViewData["FieldId"]';
+    const uploadBtn = document.getElementById('uploadBtn_' + fieldId);
+    const fileInput = document.getElementById('fileInput_' + fieldId);
+    const urlInput = document.getElementById(fieldId);
+    const previewContainer = document.getElementById('preview_' + fieldId);
+    const previewImg = document.getElementById('previewImg_' + fieldId);
+    const removeBtn = document.getElementById('removePreview_' + fieldId);
+    
+    // Click upload button
+    uploadBtn.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File selected
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Vui lòng chọn file ảnh!');
+                return;
+            }
+            
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Kích thước file không được vượt quá 5MB!');
+                return;
+            }
+            
+            // Upload file
+            uploadImage(file, fieldId);
+        }
+    });
+    
+    // URL input change
+    urlInput.addEventListener('input', function() {
+        const url = this.value.trim();
+        if (url) {
+            previewImg.src = url;
+            previewContainer.style.display = 'block';
+        } else {
+            previewContainer.style.display = 'none';
+        }
+    });
+    
+    // Remove preview
+    removeBtn.addEventListener('click', function() {
+        urlInput.value = '';
+        previewContainer.style.display = 'none';
+        fileInput.value = '';
+    });
+    
+    // Show preview if URL already has value
+    if (urlInput.value.trim()) {
+        previewImg.src = urlInput.value;
+        previewContainer.style.display = 'block';
+    }
+    
+    // Upload function
+    function uploadImage(file, fieldId) {
+        const formData = new FormData();
+        formData.append('upload', file);
+        
+        // Show loading
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tải...';
+        uploadBtn.disabled = true;
+        
+        fetch('/BaiViet/UploadImage', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Set URL to input
+                urlInput.value = data.url;
+                
+                // Show preview
+                previewImg.src = data.url;
+                previewContainer.style.display = 'block';
+                
+                // Show success message
+                showNotification('Tải ảnh lên thành công!', 'success');
+            } else {
+                showNotification('Lỗi: ' + (data.message || 'Không thể tải ảnh lên'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+            showNotification('Lỗi: Không thể tải ảnh lên', 'error');
+        })
+        .finally(() => {
+            // Reset button
+            uploadBtn.innerHTML = '<i class="fas fa-upload me-2"></i>Tải ảnh lên';
+            uploadBtn.disabled = false;
+        });
+    }
+});
+</script>
