@@ -4,38 +4,44 @@
     var trangThai = ViewBag.TrangThai as List<WebTinTuc.Models.TrangThaiBaiViet>;
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="text-primary mb-1">
-                        <i class="fas fa-edit me-2"></i>Viết bài mới
-                    </h2>
-                    <p class="text-muted mb-0">Tạo bài viết mới với trình soạn thảo phong phú</p>
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, var(--gray-50), var(--white));">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                            <i class="fas fa-edit fa-2x text-white"></i>
+                        </div>
+                    </div>
+                    <h1 class="display-6 fw-bold text-gradient mb-2">Viết bài mới</h1>
+                    <p class="lead text-muted">Tạo bài viết mới với trình soạn thảo hiện đại</p>
+                    
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <button type="button" class="btn btn-outline-primary hover-lift" id="previewBtn">
+                            <i class="fas fa-eye me-2"></i>Xem trước
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary hover-lift" id="saveBtn">
+                            <i class="fas fa-save me-2"></i>Lưu nháp
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <button type="button" class="btn btn-outline-secondary me-2" id="previewBtn">
-                        <i class="fas fa-eye me-1"></i>Xem trước
-                    </button>
-                </div>
-            </div>
 
-            <!-- Form viết bài -->
-            <form id="createArticleForm">
-                @Html.AntiForgeryToken()
-                
-                <div class="row">
-                    <!-- Cột chính -->
-                    <div class="col-lg-8">
-                        <!-- Thông tin cơ bản -->
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-info-circle me-2"></i>Thông tin cơ bản
-                                </h5>
-                            </div>
+                <!-- Form viết bài -->
+                <form id="createArticleForm">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="row">
+                        <!-- Cột chính -->
+                        <div class="col-lg-8">
+                            <!-- Thông tin cơ bản -->
+                            <div class="card border-0 shadow-sm mb-4 hover-lift">
+                                <div class="card-header gradient-bg text-white border-0 py-3">
+                                    <h5 class="mb-0 fw-600">
+                                        <i class="fas fa-info-circle me-2"></i>Thông tin cơ bản
+                                    </h5>
+                                </div>
                             <div class="card-body">
                                 <div class="mb-3">
                                     <label for="tieuDe" class="form-label">

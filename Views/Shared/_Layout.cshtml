@@ -7,28 +7,51 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebTinTuc.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <!-- Font Awesome with integrity check -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" 
+          referrerpolicy="no-referrer" />
 </head>
 <body>
     <header>
         <!-- Top Header -->
-        <div class="bg-primary text-white py-2">
+        <div class="top-header text-white py-2">
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <small><i class="fas fa-calendar-alt me-1"></i> @DateTime.Now.ToString("dddd, dd/MM/yyyy")</small>
+                        <small class="d-flex align-items-center">
+                            <i class="fas fa-calendar-alt me-2"></i> 
+                            <span>@DateTime.Now.ToString("dddd, dd/MM/yyyy")</span>
+                        </small>
                     </div>
                     <div class="col-md-6 text-end">
-                        <small><i class="fas fa-phone me-1"></i> Hotline: 1900-xxxx</small>
+                        <div class="d-flex align-items-center justify-content-end gap-3">
+                            <small class="d-flex align-items-center">
+                                <i class="fas fa-phone me-1"></i> 
+                                <span>Hotline: 1900-xxxx</span>
+                            </small>
+                            <div class="d-flex gap-2">
+                                <a href="#" class="text-white opacity-75 hover:opacity-100 transition-opacity">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="#" class="text-white opacity-75 hover:opacity-100 transition-opacity">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="#" class="text-white opacity-75 hover:opacity-100 transition-opacity">
+                                    <i class="fab fa-youtube"></i>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Main Header -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow">
+        <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container">
-                <a class="navbar-brand fw-bold text-primary fs-3" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand fw-bold fs-3 text-gradient" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="fas fa-newspaper me-2"></i>WebTinTuc
                 </a>
                 
@@ -45,22 +68,32 @@
                         </li>
                     </ul>
                     
-                    <div class="d-flex">
-                        <form method="get" asp-controller="Search" asp-action="Index" class="input-group me-3" style="width: 300px;">
-                            <input type="text" class="form-control" name="q" placeholder="Tìm kiếm tin tức..." value="@ViewBag.SearchQuery">
-                            <button class="btn btn-outline-primary" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </form>
+                    <div class="d-flex align-items-center">
+                        <div class="search-container me-3" style="width: 320px;">
+                            <form method="get" asp-controller="Search" asp-action="Index" class="d-flex">
+                                <div class="position-relative flex-grow-1">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" class="form-control" name="q" placeholder="Tìm kiếm tin tức..." value="@ViewBag.SearchQuery">
+                                </div>
+                                <button class="btn btn-primary ms-2" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                        </div>
                         
                         @if (Context.Session.GetString("UserId") != null)
                         {
                             <!-- User đã đăng nhập -->
                             <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-user me-1"></i>@Context.Session.GetString("UserName")
+                                <button class="btn btn-primary dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="fas fa-user fa-sm"></i>
+                                        </div>
+                                        <span class="d-none d-lg-inline">@Context.Session.GetString("UserName")</span>
+                                    </div>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
+                                <ul class="dropdown-menu dropdown-menu-end shadow-xl" style="z-index: 1055; min-width: 250px;">
                                     <li>
                                         <h6 class="dropdown-header">
                                             <i class="fas fa-user-circle me-1"></i>@Context.Session.GetString("UserName")
@@ -122,12 +155,14 @@
                         else
                         {
                             <!-- User chưa đăng nhập -->
-                            <div class="btn-group">
-                                <a class="btn btn-primary" asp-controller="Account" asp-action="Login">
-                                    <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-outline-primary btn-sm" asp-controller="Account" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i>
+                                    <span class="d-none d-md-inline">Đăng nhập</span>
                                 </a>
-                                <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Register">
-                                    <i class="fas fa-user-plus me-1"></i>Đăng ký
+                                <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">
+                                    <i class="fas fa-user-plus me-1"></i>
+                                    <span class="d-none d-md-inline">Đăng ký</span>
                                 </a>
                             </div>
                         }
@@ -137,10 +172,10 @@
         </nav>
         
         <!-- Menu chủ đề nằm ngang -->
-        <div class="bg-light border-bottom">
+        <div class="category-menu">
             <div class="container">
-                <nav class="navbar navbar-expand-lg navbar-light py-2">
-                    <div class="navbar-nav flex-row flex-wrap">
+                <nav class="navbar navbar-expand-lg navbar-light py-3">
+                    <div class="navbar-nav flex-row flex-wrap justify-content-center w-100">
                         @{
                             var chuDes = ViewBag.ChuDes as List<WebTinTuc.Models.ChuDe>;
                         }
@@ -148,19 +183,30 @@
                         {
                             @foreach (var chuDe in chuDes)
                             {
-                                <a class="nav-link text-dark fw-semibold me-4" href="/ChuDe/@chuDe.Slug">
-                                    @chuDe.TenChuDe.ToUpper()
+                                <a class="nav-link hover-lift" href="/ChuDe/@chuDe.Slug">
+                                    <i class="fas fa-tag me-1"></i>
+                                    @chuDe.TenChuDe
                                 </a>
                             }
                         }
                         else
                         {
                             <!-- Fallback nếu không có dữ liệu -->
-                            <a class="nav-link text-dark fw-semibold me-4" href="#">THỜI SỰ</a>
-                            <a class="nav-link text-dark fw-semibold me-4" href="#">THẾ GIỚI</a>
-                            <a class="nav-link text-dark fw-semibold me-4" href="#">KINH DOANH</a>
-                            <a class="nav-link text-dark fw-semibold me-4" href="#">GIẢI TRÍ</a>
-                            <a class="nav-link text-dark fw-semibold me-4" href="#">THỂ THAO</a>
+                            <a class="nav-link hover-lift" href="#">
+                                <i class="fas fa-tag me-1"></i>THỜI SỰ
+                            </a>
+                            <a class="nav-link hover-lift" href="#">
+                                <i class="fas fa-tag me-1"></i>THẾ GIỚI
+                            </a>
+                            <a class="nav-link hover-lift" href="#">
+                                <i class="fas fa-tag me-1"></i>KINH DOANH
+                            </a>
+                            <a class="nav-link hover-lift" href="#">
+                                <i class="fas fa-tag me-1"></i>GIẢI TRÍ
+                            </a>
+                            <a class="nav-link hover-lift" href="#">
+                                <i class="fas fa-tag me-1"></i>THỂ THAO
+                            </a>
                         }
                     </div>
                 </nav>
@@ -171,7 +217,7 @@
     <!-- Thông báo TempData -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+        <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px; background-color: #d4edda !important; color: #155724 !important; border: 1px solid #c3e6cb !important;">
             <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -179,7 +225,7 @@
     
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+        <div class="alert alert-danger alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px; background-color: #f8d7da !important; color: #721c24 !important; border: 1px solid #f5c6cb !important;">
             <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -187,7 +233,7 @@
     
     @if (TempData["InfoMessage"] != null)
     {
-        <div class="alert alert-info alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+        <div class="alert alert-info alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px; background-color: #d1ecf1 !important; color: #0c5460 !important; border: 1px solid #bee5eb !important;">
             <i class="fas fa-info-circle me-2"></i>@TempData["InfoMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -195,14 +241,14 @@
     
     @if (TempData["WarningMessage"] != null)
     {
-        <div class="alert alert-warning alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+        <div class="alert alert-warning alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px; background-color: #fff3cd !important; color: #856404 !important; border: 1px solid #ffeaa7 !important;">
             <i class="fas fa-exclamation-triangle me-2"></i>@TempData["WarningMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
     
-    <div class="container">
-        <main role="main" class="pb-3" style="padding-top: 20px;">
+    <div class="container-fluid px-0">
+        <main role="main" class="pb-5">
             @RenderBody()
         </main>
     </div>
@@ -211,19 +257,27 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <h5 class="text-primary mb-3">
+                    <h5 class="mb-3">
                         <i class="fas fa-newspaper me-2"></i>WebTinTuc
                     </h5>
-                    <p class="text-muted">Trang tin tức hàng đầu Việt Nam, cung cấp thông tin nhanh chóng, chính xác và đáng tin cậy.</p>
-                    <div class="d-flex">
-                        <a href="#" class="text-light me-3"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-light me-3"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-light"><i class="fab fa-youtube"></i></a>
+                    <p class="opacity-75 mb-4">Trang tin tức hàng đầu Việt Nam, cung cấp thông tin nhanh chóng, chính xác và đáng tin cậy.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-decoration-none p-2 rounded-circle bg-primary bg-opacity-10 hover-lift">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-decoration-none p-2 rounded-circle bg-primary bg-opacity-10 hover-lift">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-decoration-none p-2 rounded-circle bg-primary bg-opacity-10 hover-lift">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-decoration-none p-2 rounded-circle bg-primary bg-opacity-10 hover-lift">
+                            <i class="fab fa-youtube"></i>
+                        </a>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <h6 class="text-primary mb-3">Chủ đề</h6>
+                    <h6 class="mb-3">Chủ đề</h6>
                     @{
                         var chuDesFooter = ViewBag.ChuDes as List<WebTinTuc.Models.ChuDe>;
                     }
@@ -276,11 +330,20 @@
                     }
                 </div>
                 <div class="col-md-4">
-                    <h6 class="text-primary mb-3">Liên hệ</h6>
-                    <ul class="list-unstyled text-muted">
-                        <li><i class="fas fa-map-marker-alt me-2"></i>123 Đường ABC, Quận XYZ, TP.HCM</li>
-                        <li><i class="fas fa-phone me-2"></i>Hotline: 1900-xxxx</li>
-                        <li><i class="fas fa-envelope me-2"></i>Email: contact@webtintuc.com</li>
+                    <h6 class="mb-3">Liên hệ</h6>
+                    <ul class="list-unstyled opacity-75">
+                        <li class="mb-2">
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            123 Đường ABC, Quận XYZ, TP.HCM
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-phone me-2 text-primary"></i>
+                            Hotline: 1900-xxxx
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            Email: contact@webtintuc.com
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -426,12 +489,25 @@
         
         // Global notification function
         function showNotification(message, type) {
-            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-            const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            let alertClass, iconClass, bgColor, textColor, borderColor;
+            
+            if (type === 'success') {
+                alertClass = 'alert-success';
+                iconClass = 'fa-check-circle';
+                bgColor = '#d4edda';
+                textColor = '#155724';
+                borderColor = '#c3e6cb';
+            } else {
+                alertClass = 'alert-danger';
+                iconClass = 'fa-exclamation-circle';
+                bgColor = '#f8d7da';
+                textColor = '#721c24';
+                borderColor = '#f5c6cb';
+            }
             
             const alertHtml = `
                 <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
-                     style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
+                     style="top: 20px; right: 20px; z-index: 9999; min-width: 300px; background-color: ${bgColor} !important; color: ${textColor} !important; border: 1px solid ${borderColor} !important;" role="alert">
                     <i class="fas ${iconClass} me-2"></i>${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>

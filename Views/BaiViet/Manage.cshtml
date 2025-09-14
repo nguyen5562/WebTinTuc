@@ -7,16 +7,19 @@
 
 @Html.AntiForgeryToken()
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="text-primary mb-1">
-                        <i class="fas fa-list me-2"></i>Quản lý bài viết
-                    </h2>
-                    <p class="text-muted mb-0">
+<div class="min-vh-100 py-4" style="background: linear-gradient(135deg, var(--gray-50), var(--white));">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                            <i class="fas fa-list fa-2x text-white"></i>
+                        </div>
+                    </div>
+                    <h1 class="display-6 fw-bold text-gradient mb-2">Quản lý bài viết</h1>
+                    <p class="lead text-muted mb-4">
                         @if (userRole == "Tác giả")
                         {
                             <span>Danh sách bài viết của bạn</span>
@@ -26,17 +29,22 @@
                             <span>Quản lý tất cả bài viết trong hệ thống</span>
                         }
                     </p>
+                    
+                    <div class="mt-4">
+                        <a asp-controller="BaiViet" asp-action="Create" class="btn btn-primary btn-lg hover-lift">
+                            <i class="fas fa-plus me-2"></i>Viết bài mới
+                        </a>
+                    </div>
                 </div>
-                <div>
-                    <a asp-controller="BaiViet" asp-action="Create" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i>Viết bài mới
-                    </a>
-                </div>
-            </div>
 
-            <!-- Filters -->
-            <div class="card mb-4">
-                <div class="card-body">
+                <!-- Filters -->
+                <div class="card border-0 shadow-sm mb-4 hover-lift">
+                    <div class="card-header bg-light border-0 py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="fas fa-filter me-2 text-primary"></i>Bộ lọc tìm kiếm
+                        </h6>
+                    </div>
+                    <div class="card-body p-4">
                     <div class="row">
                         <div class="col-md-3">
                             <label for="statusFilter" class="form-label">Lọc theo trạng thái</label>
@@ -70,9 +78,14 @@
                 </div>
             </div>
 
-            <!-- Articles List -->
-            <div class="card">
-                <div class="card-body">
+                <!-- Articles List -->
+                <div class="card border-0 shadow-lg hover-lift">
+                    <div class="card-header gradient-bg text-white border-0 py-4">
+                        <h5 class="mb-0 fw-600">
+                            <i class="fas fa-newspaper me-2"></i>Danh sách bài viết
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
                     @if (Model.Any())
                     {
                         <div class="table-responsive">

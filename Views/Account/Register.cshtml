@@ -2,46 +2,55 @@
     ViewData["Title"] = "Đăng ký";
 }
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 mt-4">
-                <div class="card-header bg-success text-white text-center py-4">
-                    <h3 class="mb-0">
-                        <i class="fas fa-user-plus me-2"></i>Đăng ký tài khoản
-                    </h3>
-                    <p class="mb-0 mt-2">Tham gia cộng đồng WebTinTuc</p>
-                </div>
-                <div class="card-body p-4">
-
-                    <form asp-action="Register" method="post" id="registerForm">
+<div class="min-vh-100 d-flex align-items-center py-5" style="background: linear-gradient(135deg, var(--gray-50), var(--gray-100));">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card border-0 shadow-lg hover-lift">
+                    <div class="card-header text-center py-4 text-white border-0" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <div class="mb-3">
+                            <div class="rounded-circle bg-white bg-opacity-20 d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                <i class="fas fa-user-plus fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h3 class="mb-1 fw-bold">Đăng ký tài khoản</h3>
+                        <p class="mb-0 opacity-90">Tham gia cộng đồng WebTinTuc</p>
+                    </div>
+                <div class="card-body p-5">
+                    <form asp-action="Register" method="post" id="registerForm" class="needs-validation" novalidate>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="hoTen" class="form-label">
-                                        <i class="fas fa-user me-1"></i>Họ và tên <span class="text-danger">*</span>
+                                <div class="mb-4">
+                                    <label for="hoTen" class="form-label fw-500">
+                                        <i class="fas fa-user me-2 text-primary"></i>Họ và tên <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="hoTen" name="hoTen" required 
-                                           placeholder="Nhập họ và tên">
+                                    <input type="text" class="form-control form-control-lg" id="hoTen" name="hoTen" required 
+                                           placeholder="Nhập họ và tên" autocomplete="name">
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập họ và tên.
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">
-                                        <i class="fas fa-envelope me-1"></i>Email <span class="text-danger">*</span>
+                                <div class="mb-4">
+                                    <label for="email" class="form-label fw-500">
+                                        <i class="fas fa-envelope me-2 text-primary"></i>Email <span class="text-danger">*</span>
                                     </label>
-                                    <input type="email" class="form-control" id="email" name="email" required 
-                                           placeholder="Nhập email">
+                                    <input type="email" class="form-control form-control-lg" id="email" name="email" required 
+                                           placeholder="Nhập email" autocomplete="email">
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập email hợp lệ.
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="soDienThoai" class="form-label">
-                                <i class="fas fa-phone me-1"></i>Số điện thoại
+                        <div class="mb-4">
+                            <label for="soDienThoai" class="form-label fw-500">
+                                <i class="fas fa-phone me-2 text-primary"></i>Số điện thoại
                             </label>
-                            <input type="tel" class="form-control" id="soDienThoai" name="soDienThoai" 
-                                   placeholder="Nhập số điện thoại (không bắt buộc)">
+                            <input type="tel" class="form-control form-control-lg" id="soDienThoai" name="soDienThoai" 
+                                   placeholder="Nhập số điện thoại (không bắt buộc)" autocomplete="tel">
                         </div>
 
                         <div class="row">

@@ -3,81 +3,107 @@
     ViewData["Title"] = Model.TieuDe;
 }
 
-<div class="row">
-    <!-- Nội dung chính -->
-    <div class="col-lg-8">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-                <li class="breadcrumb-item">
-                    <a href="/ChuDe/@Model.IdchuDeNavigation.Slug">
-                        @Model.IdchuDeNavigation.TenChuDe
-                    </a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">@Model.TieuDe</li>
-            </ol>
-        </nav>
+<div class="container py-4">
+    <div class="row">
+        <!-- Nội dung chính -->
+        <div class="col-lg-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light rounded-3 px-3 py-2">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>Trang chủ
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/ChuDe/@Model.IdchuDeNavigation.Slug" class="text-decoration-none">
+                            <i class="fas fa-tag me-1"></i>@Model.IdchuDeNavigation.TenChuDe
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">@Model.TieuDe</li>
+                </ol>
+            </nav>
 
-        <!-- Bài viết chính -->
-        <article class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <!-- Tiêu đề -->
-                <h1 class="card-title h2 mb-3 text-primary">@Model.TieuDe</h1>
-                
-                <!-- Meta thông tin -->
-                <div class="d-flex flex-wrap align-items-center text-muted mb-4">
-                    <div class="me-4">
-                        <i class="fas fa-user me-1"></i>
-                        <strong>Tác giả:</strong> @Model.IdtacGiaNavigation.HoTen
-                    </div>
-                    <div class="me-4">
-                        <i class="fas fa-calendar me-1"></i>
-                        <strong>Ngày đăng:</strong> @Model.NgayXuatBan?.ToString("dd/MM/yyyy HH:mm")
-                    </div>
-                    <div class="me-4">
-                        <i class="fas fa-eye me-1"></i>
-                        <strong>Lượt xem:</strong> @Model.LuotXem
-                    </div>
+            <!-- Bài viết chính -->
+            <article class="article-card mb-5">
+                <div class="card-body p-5">
+                    <!-- Hot Badge -->
                     @if (Model.LaTinNong == true)
                     {
-                        <div>
-                            <span class="badge bg-danger">
+                        <div class="mb-3">
+                            <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">
                                 <i class="fas fa-fire me-1"></i>TIN NÓNG
                             </span>
                         </div>
                     }
-                </div>
-
-                <!-- Thông báo trạng thái bài viết -->
-                @if (Model.IdtrangThaiNavigation.TenTrangThai != "Đã xuất bản")
-                {
-                    <div class="bg-warning text-dark p-3 rounded mb-4">
-                        <h6 class="text-dark mb-2">
-                            <i class="fas fa-exclamation-triangle me-1"></i>Trạng thái bài viết
-                        </h6>
-                        <hr class="text-dark">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-@(Model.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt" ? "warning" : "secondary") me-2">
-                                @Model.IdtrangThaiNavigation.TenTrangThai
-                            </span>
-                            <span class="text-muted">
-                                @if (Model.IdtrangThaiNavigation.TenTrangThai == "Bản nháp")
-                                {
-                                    <i class="fas fa-edit me-1"></i>@("Bài viết này đang ở dạng bản nháp và chưa được xuất bản.")
-                                }
-                                else if (Model.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt")
-                                {
-                                    <i class="fas fa-clock me-1"></i>@("Bài viết này đang chờ quản trị viên duyệt.")
-                                }
-                                else if (Model.IdtrangThaiNavigation.TenTrangThai == "Bị từ chối")
-                                {
-                                    <i class="fas fa-times-circle me-1"></i>@("Bài viết này đã bị từ chối và không được xuất bản.")
-                                }
-                            </span>
+                    
+                    <!-- Tiêu đề -->
+                    <h1 class="display-5 fw-bold mb-4 text-gradient">@Model.TieuDe</h1>
+                    
+                    <!-- Tóm tắt -->
+                    @if (!string.IsNullOrEmpty(Model.TomTat))
+                    {
+                        <div class="lead text-muted mb-4 p-4 bg-light rounded-3">
+                            @Model.TomTat
+                        </div>
+                    }
+                    
+                    <!-- Meta thông tin -->
+                    <div class="article-meta mb-5 p-3 bg-light rounded-3">
+                        <div class="author">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-600 text-primary">@Model.IdtacGiaNavigation.HoTen</div>
+                                    <small class="text-muted">Tác giả</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="date mt-2">
+                            <i class="fas fa-calendar-alt text-primary me-2"></i>
+                            <span class="fw-500">@Model.NgayXuatBan?.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        <div class="views mt-2">
+                            <i class="fas fa-eye text-primary me-2"></i>
+                            <span class="fw-500">@Model.LuotXem lượt xem</span>
                         </div>
                     </div>
-                }
+
+                    <!-- Thông báo trạng thái bài viết -->
+                    @if (Model.IdtrangThaiNavigation.TenTrangThai != "Đã xuất bản")
+                    {
+                        <div class="alert alert-warning border-0 shadow-sm mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="alert-heading mb-1">Trạng thái bài viết</h6>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-@(Model.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt" ? "warning" : "secondary") me-2">
+                                            @Model.IdtrangThaiNavigation.TenTrangThai
+                                        </span>
+                                        <small class="text-muted">
+                                            @if (Model.IdtrangThaiNavigation.TenTrangThai == "Bản nháp")
+                                            {
+                                                @("Bài viết này đang ở dạng bản nháp và chưa được xuất bản.")
+                                            }
+                                            else if (Model.IdtrangThaiNavigation.TenTrangThai == "Chờ duyệt")
+                                            {
+                                                @("Bài viết này đang chờ quản trị viên duyệt.")
+                                            }
+                                            else if (Model.IdtrangThaiNavigation.TenTrangThai == "Bị từ chối")
+                                            {
+                                                @("Bài viết này đã bị từ chối và không được xuất bản.")
+                                            }
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
 
                 <!-- Action buttons -->
                 @{

@@ -2,52 +2,58 @@
     ViewData["Title"] = "Quản trị hệ thống";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">
-                    <i class="fas fa-tachometer-alt me-2"></i>Quản trị hệ thống
-                </h1>
-            </div>
+<div class="min-vh-100 py-4" style="background: linear-gradient(135deg, var(--gray-50), var(--white));">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header Dashboard -->
+                <div class="text-center mb-5">
+                    <div class="mb-4">
+                        <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center shadow-lg" style="width: 100px; height: 100px;">
+                            <i class="fas fa-tachometer-alt fa-3x text-white"></i>
+                        </div>
+                    </div>
+                    <h1 class="display-5 fw-bold text-gradient mb-2">Dashboard Quản trị</h1>
+                    <p class="lead text-muted">Tổng quan hệ thống và quản lý nội dung</p>
+                </div>
 
-            <!-- Thống kê tổng quan -->
-            <div class="row mb-4">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                        Tổng số bài viết
+                <!-- Thống kê tổng quan -->
+                <div class="row mb-5">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100 hover-lift">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-file-alt fa-lg text-primary"></i>
                                     </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalArticles">-</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-600 text-uppercase text-primary mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                                            Tổng số bài viết
+                                        </div>
+                                        <div class="h4 mb-0 fw-bold text-dark" id="totalArticles">-</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                        Bài viết đã xuất bản
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100 hover-lift">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-check-circle fa-lg text-success"></i>
                                     </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="publishedArticles">-</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-600 text-uppercase text-success mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                                            Đã xuất bản
+                                        </div>
+                                        <div class="h4 mb-0 fw-bold text-dark" id="publishedArticles">-</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-info shadow h-100 py-2">

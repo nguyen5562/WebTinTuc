@@ -5,17 +5,20 @@
     var baiVietTheoChuDe = ViewBag.BaiVietTheoChuDe as Dictionary<WebTinTuc.Models.ChuDe, List<WebTinTuc.Models.BaiViet>>;
 }
 
-<div class="container-fluid px-0">
+<div class="min-vh-100">
     <!-- Bài viết HOT -->
     @if (baiVietHot != null && baiVietHot.Any())
     {
-        <div class="bg-danger text-white py-4 mb-4">
-            <div class="container">
-                <div class="row align-items-center mb-3">
+        <section class="hot-news-section py-5 mb-5">
+            <div class="container hot-news-content">
+                <div class="row align-items-center mb-4">
                     <div class="col">
-                        <h3 class="mb-0">
-                            <i class="fas fa-fire me-2"></i>TIN NÓNG
-                        </h3>
+                        <h2 class="mb-0 d-flex align-items-center">
+                            <span class="badge bg-warning text-dark me-3 px-3 py-2">
+                                <i class="fas fa-fire me-1"></i>HOT
+                            </span>
+                            <span class="fs-3 fw-bold">TIN NÓNG</span>
+                        </h2>
                     </div>
                 </div>
                 
@@ -23,67 +26,70 @@
                 {
                     <!-- Hiển thị 1 tin nóng lớn -->
                     var tinNong = baiVietHot.First();
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">
-                                <i class="fas fa-fire me-1"></i>HOT
-                            </span>
-                        </div>
-                        <div class="col">
-                            <h4 class="mb-1">@tinNong.TieuDe</h4>
-                            <small class="opacity-75">@tinNong.TomTat</small>
-                        </div>
-                        <div class="col-auto">
-                            <a href="/BaiViet/@tinNong.Slug" class="btn btn-light btn-sm">Đọc ngay</a>
+                    <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95)); color: white;">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h4 class="card-title mb-3 fw-bold text-white">@tinNong.TieuDe</h4>
+                                    <p class="card-text mb-3 text-white opacity-90">@tinNong.TomTat</p>
+                                    <div class="d-flex align-items-center gap-3 text-white opacity-75">
+                                        <small>
+                                            <i class="fas fa-user me-1"></i>
+                                            @tinNong.IdtacGiaNavigation?.HoTen
+                                        </small>
+                                        <small>
+                                            <i class="fas fa-clock me-1"></i>
+                                            @tinNong.NgayXuatBan?.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a href="/BaiViet/@tinNong.Slug" class="btn btn-light btn-lg hover-lift fw-600">
+                                        <i class="fas fa-arrow-right me-2"></i>Đọc ngay
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 }
                 else
                 {
-                    <!-- Hiển thị nhiều tin nóng dạng carousel -->
-                    <div id="hotNewsCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                            @for (int i = 0; i < baiVietHot.Count; i++)
-                            {
-                                var tinNong = baiVietHot[i];
-                                <div class="carousel-item @(i == 0 ? "active" : "")">
-                                    <div class="row align-items-center">
-                                        <div class="col-auto">
-                                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">
-                                                <i class="fas fa-fire me-1"></i>HOT
-                                            </span>
-                                        </div>
-                                        <div class="col">
-                                            <h4 class="mb-1">@tinNong.TieuDe</h4>
-                                            <small class="opacity-75">@tinNong.TomTat</small>
-                                        </div>
-                                        <div class="col-auto">
-                                            <a href="/BaiViet/@tinNong.Slug" class="btn btn-light btn-sm">Đọc ngay</a>
+                    <!-- Hiển thị nhiều tin nóng dạng grid -->
+                    <div class="row g-4">
+                        @foreach (var tinNong in baiVietHot.Take(3))
+                        {
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-lg h-100 hover-lift" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95)); color: white;">
+                                    <div class="card-body p-4">
+                                        <h5 class="card-title fw-bold mb-3 text-white">@tinNong.TieuDe</h5>
+                                        <p class="card-text mb-3 text-white opacity-90 text-truncate-3">@tinNong.TomTat</p>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="article-meta text-white opacity-75">
+                                                <small class="d-block">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    @tinNong.IdtacGiaNavigation?.HoTen
+                                                </small>
+                                                <small>
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    @tinNong.NgayXuatBan?.ToString("dd/MM")
+                                                </small>
+                                            </div>
+                                            <a href="/BaiViet/@tinNong.Slug" class="btn btn-light btn-sm fw-600">
+                                                Đọc ngay <i class="fas fa-arrow-right ms-1"></i>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                            }
-                        </div>
-                        
-                        @if (baiVietHot.Count > 1)
-                        {
-                            <button class="carousel-control-prev" type="button" data-bs-target="#hotNewsCarousel" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#hotNewsCarousel" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
+                            </div>
                         }
                     </div>
                 }
             </div>
-        </div>
+        </section>
     }
 
     <!-- Nội dung chính -->
-    <div class="container">
+    <div class="container py-5">
         <div class="row">
             <!-- Cột chính -->
             <div class="col-lg-8">
@@ -94,13 +100,15 @@
                         var chuDe = kvp.Key;
                         var baiViets = kvp.Value;
                         
-                        <div class="mb-5">
+                        <section class="news-section">
                             <!-- Tiêu đề chủ đề -->
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h3 class="text-primary border-bottom border-primary pb-2">
-                                    <i class="fas fa-folder-open me-2"></i>@chuDe.TenChuDe
+                            <div class="news-section-header">
+                                <h3 class="news-section-title">
+                                    @chuDe.TenChuDe
                                 </h3>
-                                <a href="/ChuDe/@chuDe.Slug" class="btn btn-outline-primary btn-sm">Xem tất cả</a>
+                                <a href="/ChuDe/@chuDe.Slug" class="btn btn-outline-primary btn-sm hover-lift">
+                                    Xem thêm <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
                             </div>
 
                             <!-- Danh sách bài viết -->
@@ -108,68 +116,59 @@
                                 @foreach (var baiViet in baiViets)
                                 {
                                     <div class="col-md-6 mb-4">
-                                        <div class="card h-100 shadow-sm">
+                                        <article class="article-card h-100 hover-lift">
                                             @if (!string.IsNullOrEmpty(baiViet.UrlanhBia))
                                             {
-                                                <img src="@baiViet.UrlanhBia" class="card-img-top" alt="@baiViet.TieuDe" style="height: 200px; object-fit: cover;">
+                                                <img src="@baiViet.UrlanhBia" class="card-img-top" alt="@baiViet.TieuDe">
                                             }
                                             else
                                             {
-                                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                                    <i class="fas fa-image text-muted fa-3x"></i>
+                                                <div class="card-img-top bg-gradient-to-br from-gray-100 to-gray-200 d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                    <i class="fas fa-image text-muted fa-3x opacity-50"></i>
                                                 </div>
                                             }
                                             
                                             <div class="card-body d-flex flex-column">
-                                                <h5 class="card-title">
-                                                    <a href="/BaiViet/@baiViet.Slug" class="text-decoration-none text-dark">@baiViet.TieuDe</a>
+                                                <h5 class="card-title mb-3">
+                                                    <a href="/BaiViet/@baiViet.Slug" class="text-decoration-none">@baiViet.TieuDe</a>
                                                 </h5>
                                                 
-                                                <p class="card-text text-muted flex-grow-1">
+                                                <p class="card-text flex-grow-1 mb-4">
                                                     @if (!string.IsNullOrEmpty(baiViet.TomTat))
                                                     {
-                                                        @(baiViet.TomTat.Length > 150 ? baiViet.TomTat.Substring(0, 150) + "..." : baiViet.TomTat)
+                                                        @(baiViet.TomTat.Length > 120 ? baiViet.TomTat.Substring(0, 120) + "..." : baiViet.TomTat)
                                                     }
                                                 </p>
                                                 
-                                                <div class="mt-auto">
-                                                    <div class="d-flex justify-content-between align-items-center text-muted small mb-2">
-                                                        <span>
-                                                            <i class="fas fa-user me-1"></i>@baiViet.IdtacGiaNavigation?.HoTen
-                                                        </span>
-                                                        <span>
-                                                            <i class="fas fa-comments me-1"></i>0 bình luận
-                                                        </span>
+                                                <div class="article-meta mt-auto">
+                                                    <div class="author">
+                                                        <i class="fas fa-user me-1"></i>@baiViet.IdtacGiaNavigation?.HoTen
                                                     </div>
-                                                    
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-clock me-1"></i>
-                                                            @if (baiViet.NgayXuatBan.HasValue)
-                                                            {
-                                                                @baiViet.NgayXuatBan.Value.ToString("dd/MM/yyyy HH:mm")
-                                                            }
-                                                            else
-                                                            {
-                                                                @baiViet.NgayTao.Value.ToString("dd/MM/yyyy HH:mm")
-                                                            }
-                                                        </small>
-                                                        
-                                                        <div class="d-flex align-items-center">
-                                                            @if (baiViet.LaTinNong == true)
-                                                            {
-                                                                <span class="badge bg-danger me-1">HOT</span>
-                                                            }
-                                                            <span class="badge bg-secondary">@baiViet.LuotXem lượt xem</span>
-                                                        </div>
+                                                    <div class="date">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        @if (baiViet.NgayXuatBan.HasValue)
+                                                        {
+                                                            @baiViet.NgayXuatBan.Value.ToString("dd/MM/yyyy")
+                                                        }
+                                                        else
+                                                        {
+                                                            @baiViet.NgayTao.Value.ToString("dd/MM/yyyy")
+                                                        }
+                                                    </div>
+                                                    <div class="views">
+                                                        <i class="fas fa-eye me-1"></i>@baiViet.LuotXem
+                                                        @if (baiViet.LaTinNong == true)
+                                                        {
+                                                            <span class="badge bg-danger ms-2">HOT</span>
+                                                        }
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </article>
                                     </div>
                                 }
                             </div>
-                        </div>
+                        </section>
                     }
                 }
                 else
@@ -185,9 +184,9 @@
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <!-- Chủ đề phổ biến -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Chủ đề phổ biến</h5>
+                <div class="card mb-4 border-0 shadow-lg">
+                    <div class="card-header gradient-bg text-white border-0 py-3">
+                        <h5 class="mb-0 fw-600"><i class="fas fa-list me-2"></i>Chủ đề phổ biến</h5>
                     </div>
                     <div class="card-body">
                         @if (chuDes != null && chuDes.Any())
@@ -195,10 +194,12 @@
                             <ul class="list-unstyled mb-0">
                                 @foreach (var chuDe in chuDes.Take(8))
                                 {
-                                    <li class="mb-2">
-                                        <a href="/ChuDe/@chuDe.Slug" class="text-decoration-none d-flex justify-content-between align-items-center">
-                                            <span>@chuDe.TenChuDe</span>
-                                            <span class="badge bg-light text-dark">@(baiVietTheoChuDe?.ContainsKey(chuDe) == true ? baiVietTheoChuDe[chuDe].Count : 0)</span>
+                                    <li class="mb-3">
+                                        <a href="/ChuDe/@chuDe.Slug" class="text-decoration-none d-flex justify-content-between align-items-center py-3 px-3 rounded-3 hover-lift" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); transition: all 0.3s ease; border: 1px solid #dee2e6;">
+                                            <span class="fw-600 text-dark">
+                                                <i class="fas fa-tag me-2"></i>@chuDe.TenChuDe
+                                            </span>
+                                            <span class="badge bg-primary">@(baiVietTheoChuDe?.ContainsKey(chuDe) == true ? baiVietTheoChuDe[chuDe].Count : 0)</span>
                                         </a>
                                     </li>
                                 }
@@ -208,9 +209,9 @@
                 </div>
 
                 <!-- Bài viết mới nhất -->
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Bài viết mới nhất</h5>
+                <div class="card mb-4 border-0 shadow-lg">
+                    <div class="card-header text-white border-0 py-3" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <h5 class="mb-0 fw-600"><i class="fas fa-clock me-2"></i>Bài viết mới nhất</h5>
                     </div>
                     <div class="card-body">
                         @if (baiVietTheoChuDe != null && baiVietTheoChuDe.Any())
@@ -223,34 +224,42 @@
                                 
                             @foreach (var baiViet in baiVietMoiNhat)
                             {
-                                <div class="d-flex mb-3">
+                                <article class="d-flex mb-4 p-3 rounded-3 hover-lift" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); border: 1px solid #dee2e6;">
                                     @if (!string.IsNullOrEmpty(baiViet.UrlanhBia))
                                     {
-                                        <img src="@baiViet.UrlanhBia" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;" alt="@baiViet.TieuDe">
+                                        <img src="@baiViet.UrlanhBia" class="rounded-3 me-3" style="width: 64px; height: 64px; object-fit: cover;" alt="@baiViet.TieuDe">
                                     }
                                     else
                                     {
-                                        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                            <i class="fas fa-image text-muted"></i>
+                                        <div class="bg-white rounded-3 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-image text-primary"></i>
                                         </div>
                                     }
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1">
-                                            <a href="/BaiViet/@baiViet.Slug" class="text-decoration-none text-dark">@(baiViet.TieuDe.Length > 50 ? baiViet.TieuDe.Substring(0, 50) + "..." : baiViet.TieuDe)</a>
+                                        <h6 class="mb-2 fw-600">
+                                            <a href="/BaiViet/@baiViet.Slug" class="text-decoration-none text-dark">
+                                                @(baiViet.TieuDe.Length > 45 ? baiViet.TieuDe.Substring(0, 45) + "..." : baiViet.TieuDe)
+                                            </a>
                                         </h6>
-                                        <small class="text-muted">
-                                            <i class="fas fa-clock me-1"></i>
-                                            @if (baiViet.NgayXuatBan.HasValue)
+                                        <div class="d-flex align-items-center gap-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                @if (baiViet.NgayXuatBan.HasValue)
+                                                {
+                                                    @baiViet.NgayXuatBan.Value.ToString("dd/MM");
+                                                }
+                                                else
+                                                {
+                                                    @baiViet.NgayTao.Value.ToString("dd/MM");
+                                                }
+                                            </small>
+                                            @if (baiViet.LaTinNong == true)
                                             {
-                                                @baiViet.NgayXuatBan.Value.ToString("dd/MM/yyyy");
+                                                <span class="badge bg-danger badge-sm">HOT</span>
                                             }
-                                            else
-                                            {
-                                                @baiViet.NgayTao.Value.ToString("dd/MM/yyyy");
-                                            }
-                                        </small>
+                                        </div>
                                     </div>
-                                </div>
+                                </article>
                             }
                         }
                     </div>
